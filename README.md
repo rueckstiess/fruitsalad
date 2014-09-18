@@ -14,7 +14,7 @@ You need to have [mtools](https://github.com/rueckstiess/mtools) installed and l
 python fruitsalad.py <logfile>
 ```
 
-to output the scrambled version to _stdout_, or redirect the output to a file by appending `> redacted.log` to the end.
+to output the scrambled version to _stdout_, or redirect the output to a file by adding `> redacted.log` to the end of the command.
 
 
 ### DISCLAMER
