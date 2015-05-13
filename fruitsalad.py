@@ -61,7 +61,7 @@ class FruitSaladTool(LogFileTool):
 
 
     def _replace_string(self, match):
-        return hashlib.md5(match.group(0)).hexdigest()
+        return '"' + hashlib.md5(match.group(0)).hexdigest() + '"'
 
 
     def run(self, arguments=None):
