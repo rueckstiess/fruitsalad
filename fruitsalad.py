@@ -3,7 +3,7 @@
 from mtools.util.logfile import LogFile
 from mtools.util.logevent import LogEvent
 from mtools.util.cmdlinetool import LogFileTool
-from random import randrange, choice
+from random import seed, randrange, choice
 
 import pprint
 import re
@@ -21,6 +21,8 @@ class FruitSaladTool(LogFileTool):
         LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
 
         self.argparser.description = 'Anonymizes log files by replacing IP addresses, namespaces, strings.'
+        self.argparser.add_argument('--seed', '-s', action='store', metavar='S', default=None, help='seed the random number generator with S (any string)')
+
         self.replacements = {}
 
 
@@ -36,14 +38,14 @@ class FruitSaladTool(LogFileTool):
                     part = self.replacements.setdefault(part, choice(fruits))
                 elif i == len(parts) - 2:
                     part = self.replacements.setdefault(part, choice(colors))
-                else: 
+                else:
                     part = self.replacements.setdefault(part, choice(adjectives))
-            
+
             replaced.append(part[:])
 
         return '.'.join(replaced)
 
-    
+
     def _replace_ip(self, match):
         ip = match.group(0)
         # don't replace localhost ip
@@ -65,6 +67,9 @@ class FruitSaladTool(LogFileTool):
     def run(self, arguments=None):
         """ Print out useful information about the log file. """
         LogFileTool.run(self, arguments)
+
+        if self.args['seed'] != None:
+            seed(self.args['seed'])
 
         for logevent in self.args['logfile']:
             line = logevent.line_str
