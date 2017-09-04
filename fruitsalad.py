@@ -12,7 +12,7 @@ fruits = ['apple', 'apricot', 'avocado', 'banana', 'breadfruit', 'bilberry', 'bl
 class FruitSaladTool():
     """ replace IP addresses, hostnames, namespaces, strings with random values. """
 
-    def __init__(self, arg_seed=None, arg_logfile=None):
+    def __init__(self, arg_logfile, arg_seed=None):
         self.seed = arg_seed
         self.logfile = arg_logfile
         self.replacements = {}
