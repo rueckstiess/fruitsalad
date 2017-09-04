@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
-from mtools.util.logfile import LogFile
-from mtools.util.logevent import LogEvent
-from mtools.util.cmdlinetool import LogFileTool
 from random import seed, randrange, choice
-
-import pprint
+import argparse
 import re
 import hashlib
 
@@ -13,16 +9,12 @@ adjectives = ["acerbic", "acidic", "acrid", "aged", "ambrosial", "ample", "appea
 colors = ['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray', 'darkgreen', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow', 'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightpink', 'lightsalmon', 'lightseagreen', 'lightskyblue', 'lightslategray', 'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin', 'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple', 'red', 'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 'slategray', 'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen']
 fruits = ['apple', 'apricot', 'avocado', 'banana', 'breadfruit', 'bilberry', 'blackberry', 'blackcurrant', 'blueberry', 'boysenberry', 'cantaloupe', 'currant', 'cherry', 'cherimoya', 'cloudberry', 'coconut', 'cranberry', 'cucumber', 'damson', 'date', 'dragonfruit', 'durian', 'eggplant', 'elderberry', 'feijoa', 'fig', 'goji.berry', 'gooseberry', 'grape', 'raisin', 'grapefruit', 'guava', 'huckleberry', 'honeydew', 'jackfruit', 'jambul', 'jujube', 'kiwi.fruit', 'kumquat', 'lemon', 'lime', 'loquat', 'lychee', 'mango', 'marion.berry', 'melon', 'cantaloupe', 'honeydew', 'watermelon', 'rock.melon', 'miracle.fruit', 'mulberry', 'nectarine', 'nut', 'olive', 'orange', 'clementine', 'mandarine', 'blood.orange', 'tangerine', 'papaya', 'passionfruit', 'peach', 'pepper', 'chili.pepper', 'bell.pepper', 'pear', 'williams.pear.or.bartlett.pear', 'persimmon', 'physalis', 'pineapple', 'pomegranate', 'pomelo', 'mangosteen', 'quince', 'raspberry', 'western.raspberry', 'rambutan', 'redcurrant', 'salal.berry', 'salmon.berry', 'satsuma', 'star.fruit', 'strawberry', 'tamarillo', 'tomato', 'ugli.fruit', 'watermelon']
 
-class FruitSaladTool(LogFileTool):
+class FruitSaladTool():
     """ replace IP addresses, hostnames, namespaces, strings with random values. """
 
-    def __init__(self):
-        """ Constructor: add description to argparser. """
-        LogFileTool.__init__(self, multiple_logfiles=False, stdin_allowed=True)
-
-        self.argparser.description = 'Anonymizes log files by replacing IP addresses, namespaces, strings.'
-        self.argparser.add_argument('--seed', '-s', action='store', metavar='S', default=None, help='seed the random number generator with S (any string)')
-
+    def __init__(self, arg_seed=None, arg_logfile=None):
+        self.seed = arg_seed
+        self.logfile = arg_logfile
         self.replacements = {}
 
 
@@ -64,15 +56,14 @@ class FruitSaladTool(LogFileTool):
         return '"' + hashlib.md5(match.group(0)).hexdigest() + '"'
 
 
-    def run(self, arguments=None):
+    def run(self):
         """ Print out useful information about the log file. """
-        LogFileTool.run(self, arguments)
 
-        if self.args['seed'] != None:
-            seed(self.args['seed'])
+        if self.seed != None:
+            seed(self.seed)
 
-        for logevent in self.args['logfile']:
-            line = logevent.line_str
+        for logevent in open(self.logfile, 'r'):
+            line = logevent
 
             # replace IP addresses
             line = re.sub(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', self._replace_ip, line)
@@ -83,10 +74,15 @@ class FruitSaladTool(LogFileTool):
             # replace hostnames and namespaces
             line = re.sub(r'[a-zA-Z$][^ \t\n\r\f\v:]+(\.[a-zA-Z$][^ \t\n\r\f\v:]+)+', self._replace_dottedname, line)
 
-            print line
+            print line.strip()
 
 
 if __name__ == '__main__':
-    tool = FruitSaladTool()
-    tool.run()
+    argparser = argparse.ArgumentParser()
+    argparser.description = 'Anonymizes log files by replacing IP addresses, namespaces, strings.'
+    argparser.add_argument('--seed', '-s', action='store', metavar='S', default=None, help='seed the random number generator with S (any string)')
+    argparser.add_argument('logfile', type=str)
+    args = argparser.parse_args()
 
+    tool = FruitSaladTool(arg_seed=args.seed, arg_logfile=args.logfile)
+    tool.run()
