@@ -1,0 +1,47 @@
+Mon Sep  4 15:25:31.160 [initandlisten] MongoDB starting : pid=96748 port=27017 dbpath=/data/db 64-bit host=mongodb.local
+Mon Sep  4 15:25:31.160 [initandlisten] db version v2.4.14
+Mon Sep  4 15:25:31.160 [initandlisten] git version: 05bebf9ab15511a71bfbded684bb226014c0a553
+Mon Sep  4 15:25:31.160 [initandlisten] build info: Darwin bs-osx-106-x86-64-2.10gen.cc 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+Mon Sep  4 15:25:31.160 [initandlisten] allocator: system
+Mon Sep  4 15:25:31.160 [initandlisten] options: { dbpath: "/data/db", fork: true, logappend: true, logpath: "/data/mongod.log", port: 27017 }
+Mon Sep  4 15:25:31.161 [initandlisten] journal dir=/data/db/journal
+Mon Sep  4 15:25:31.161 [initandlisten] recover : no journal files present, no recovery needed
+Mon Sep  4 15:25:31.170 [initandlisten] allocating new ns file /data/db/local.ns, filling with zeroes...
+Mon Sep  4 15:25:31.214 [FileAllocator] allocating new datafile /data/db/local.0, filling with zeroes...
+Mon Sep  4 15:25:31.214 [FileAllocator] creating directory /data/db/_tmp
+Mon Sep  4 15:25:31.311 [FileAllocator] done allocating datafile /data/db/local.0, size: 64MB,  took 0.096 secs
+Mon Sep  4 15:25:31.328 [initandlisten] command local.$cmd command: { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0  reslen:37 157ms
+Mon Sep  4 15:25:31.330 [websvr] admin web console waiting for connections on port 28017
+Mon Sep  4 15:25:31.330 [initandlisten] waiting for connections on port 27017
+Mon Sep  4 15:25:31.680 [initandlisten] connection accepted from 127.0.0.1:56846 #1 (1 connection now open)
+Mon Sep  4 15:25:32.185 [conn1] end connection 127.0.0.1:56846 (3 connections now open)
+Mon Sep  4 15:26:00.562 [conn6] allocating new ns file /data/db/test.ns, filling with zeroes...
+Mon Sep  4 15:26:00.593 [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
+Mon Sep  4 15:26:00.695 [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.101 secs
+Mon Sep  4 15:26:00.713 [FileAllocator] allocating new datafile /data/db/test.1, filling with zeroes...
+Mon Sep  4 15:26:00.714 [conn6] build index test.test { _id: 1 }
+Mon Sep  4 15:26:00.755 [conn6] build index done.  scanned 0 total records. 0.04 secs
+Mon Sep  4 15:26:00.755 [conn6] insert test.test ninserted:1 keyUpdates:0 locks(micros) w:192860 192ms
+Mon Sep  4 15:26:00.926 [FileAllocator] done allocating datafile /data/db/test.1, size: 128MB,  took 0.212 secs
+Mon Sep  4 15:26:38.142 [conn6] creating profile collection: test.system.profile
+Mon Sep  4 15:26:48.923 [conn6] query test.test query: { key: 1.0 } ntoreturn:0 ntoskip:0 nscanned:3 keyUpdates:0 locks(micros) r:215 nreturned:0 reslen:20 0ms
+Mon Sep  4 15:27:18.286 [conn6] query test.test query: { key.array: 1.0 } ntoreturn:0 ntoskip:0 nscanned:3 keyUpdates:0 locks(micros) r:138 nreturned:0 reslen:20 0ms
+Mon Sep  4 15:27:22.462 [conn6] end connection 127.0.0.1:56852 (0 connections now open)
+Mon Sep  4 15:27:27.149 [conn8] command admin.$cmd command: { ping: 1 } ntoreturn:1 keyUpdates:0  reslen:37 0ms
+Mon Sep  4 15:27:27.170 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+Mon Sep  4 15:27:27.171 [signalProcessingThread] now exiting
+Mon Sep  4 15:27:27.171 dbexit: 
+Mon Sep  4 15:27:27.171 [signalProcessingThread] shutdown: going to close listening sockets...
+Mon Sep  4 15:27:27.171 [signalProcessingThread] closing listening socket: 10
+Mon Sep  4 15:27:27.172 [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+Mon Sep  4 15:27:27.172 [signalProcessingThread] shutdown: going to flush diaglog...
+Mon Sep  4 15:27:27.172 [signalProcessingThread] shutdown: going to close sockets...
+Mon Sep  4 15:27:27.172 [signalProcessingThread] shutdown: waiting for fs preallocator...
+Mon Sep  4 15:27:27.172 [signalProcessingThread] shutdown: lock for final commit...
+Mon Sep  4 15:27:27.172 [signalProcessingThread] shutdown: final commit...
+Mon Sep  4 15:27:27.180 [signalProcessingThread] shutdown: closing all files...
+Mon Sep  4 15:27:27.180 [signalProcessingThread] closeAllFiles() finished
+Mon Sep  4 15:27:27.180 [signalProcessingThread] journalCleanup...
+Mon Sep  4 15:27:27.180 [signalProcessingThread] removeJournalFiles
+Mon Sep  4 15:27:27.181 [signalProcessingThread] shutdown: removing fs lock...
+Mon Sep  4 15:27:27.181 dbexit: really exiting now

@@ -1,0 +1,73 @@
+2017-09-04T15:53:44.521+1000 [initandlisten] MongoDB starting : pid=98141 port=27017 dbpath=/data/db 64-bit host=mongodb.local
+2017-09-04T15:53:44.521+1000 [initandlisten] db version v2.6.12
+2017-09-04T15:53:44.521+1000 [initandlisten] git version: d73c92b1c85703828b55c2916a5dd4ad46535f6a
+2017-09-04T15:53:44.521+1000 [initandlisten] build info: Darwin mci-osx108-11.build.10gen.cc 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2017-09-04T15:53:44.521+1000 [initandlisten] allocator: system
+2017-09-04T15:53:44.521+1000 [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/data/db" }, systemLog: { destination: "file", logAppend: true, path: "/data/mongod.log" } }
+2017-09-04T15:53:44.522+1000 [initandlisten] journal dir=/data/db/journal
+2017-09-04T15:53:44.523+1000 [initandlisten] recover : no journal files present, no recovery needed
+2017-09-04T15:53:44.535+1000 [initandlisten] allocating new ns file /data/db/local.ns, filling with zeroes...
+2017-09-04T15:53:44.565+1000 [FileAllocator] allocating new datafile /data/db/local.0, filling with zeroes...
+2017-09-04T15:53:44.565+1000 [FileAllocator] creating directory /data/db/_tmp
+2017-09-04T15:53:44.679+1000 [FileAllocator] done allocating datafile /data/db/local.0, size: 64MB,  took 0.112 secs
+2017-09-04T15:53:44.700+1000 [initandlisten] build index on: local.startup_log properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "local.startup_log" }
+2017-09-04T15:53:44.701+1000 [initandlisten] 	 added index to empty collection
+2017-09-04T15:53:44.701+1000 [initandlisten] command local.$cmd command: create { create: "startup_log", size: 10485760, capped: true } ntoreturn:1 keyUpdates:0 numYields:0  reslen:37 166ms
+2017-09-04T15:53:44.702+1000 [initandlisten] waiting for connections on port 27017
+2017-09-04T15:53:44.702+1000 [initandlisten] connection accepted from 127.0.0.1:57011 #1 (1 connection now open)
+2017-09-04T15:53:44.705+1000 [initandlisten] connection accepted from 127.0.0.1:57013 #2 (2 connections now open)
+2017-09-04T15:53:44.707+1000 [conn1] end connection 127.0.0.1:57011 (1 connection now open)
+2017-09-04T15:53:44.707+1000 [conn2] end connection 127.0.0.1:57013 (1 connection now open)
+2017-09-04T15:53:44.708+1000 [initandlisten] connection accepted from 127.0.0.1:57014 #3 (1 connection now open)
+2017-09-04T15:53:44.710+1000 [initandlisten] connection accepted from 127.0.0.1:57015 #4 (2 connections now open)
+2017-09-04T15:53:44.711+1000 [conn4] end connection 127.0.0.1:57015 (1 connection now open)
+2017-09-04T15:53:44.711+1000 [conn3] end connection 127.0.0.1:57014 (1 connection now open)
+2017-09-04T15:53:49.531+1000 [initandlisten] connection accepted from 127.0.0.1:57017 #5 (1 connection now open)
+2017-09-04T15:54:06.065+1000 [conn5] end connection 127.0.0.1:57017 (0 connections now open)
+2017-09-04T15:54:08.781+1000 [initandlisten] connection accepted from 127.0.0.1:57019 #6 (1 connection now open)
+2017-09-04T15:54:13.452+1000 [conn6] creating profile collection: test.system.profile
+2017-09-04T15:54:13.453+1000 [conn6] allocating new ns file /data/db/test.ns, filling with zeroes...
+2017-09-04T15:54:13.499+1000 [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
+2017-09-04T15:54:13.596+1000 [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.097 secs
+2017-09-04T15:54:13.602+1000 [conn6] command test.$cmd command: profile { profile: 2.0, slowms: -1.0 } keyUpdates:0 numYields:0 locks(micros) w:149813 reslen:58 149ms
+2017-09-04T15:54:13.605+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:20.630+1000 [conn6] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:20.635+1000 [conn6] build index on: test.test properties: { v: 1, key: { _id: 1 }, name: "_id_", ns: "test.test" }
+2017-09-04T15:54:20.635+1000 [conn6] 	 added index to empty collection
+2017-09-04T15:54:20.635+1000 [conn6] insert test.test query: { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:2561 2ms
+2017-09-04T15:54:20.636+1000 [conn6] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:228 reslen:40 3ms
+2017-09-04T15:54:20.637+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:21.929+1000 [conn6] insert test.test query: { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:119 0ms
+2017-09-04T15:54:21.930+1000 [conn6] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:423 reslen:40 0ms
+2017-09-04T15:54:21.931+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:23.163+1000 [conn6] insert test.test query: { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:35 0ms
+2017-09-04T15:54:23.163+1000 [conn6] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:402 reslen:40 0ms
+2017-09-04T15:54:23.164+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:29.589+1000 [conn6] query test.test query: { key: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:1046 nreturned:1 reslen:55 1ms
+2017-09-04T15:54:29.590+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:34.580+1000 [conn6] query test.test query: { key.array: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:112 nreturned:0 reslen:20 0ms
+2017-09-04T15:54:34.581+1000 [conn6] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:35.837+1000 [conn6] end connection 127.0.0.1:57019 (0 connections now open)
+2017-09-04T15:54:39.491+1000 [initandlisten] connection accepted from 127.0.0.1:57020 #7 (1 connection now open)
+2017-09-04T15:54:39.495+1000 [initandlisten] connection accepted from 127.0.0.1:57021 #8 (2 connections now open)
+2017-09-04T15:54:39.496+1000 [conn8] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 numYields:0  reslen:37 0ms
+2017-09-04T15:54:39.496+1000 [conn7] end connection 127.0.0.1:57020 (1 connection now open)
+2017-09-04T15:54:39.496+1000 [conn8] end connection 127.0.0.1:57021 (1 connection now open)
+2017-09-04T15:54:39.515+1000 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2017-09-04T15:54:39.516+1000 [signalProcessingThread] now exiting
+2017-09-04T15:54:39.516+1000 [signalProcessingThread] dbexit: 
+2017-09-04T15:54:39.516+1000 [signalProcessingThread] shutdown: going to close listening sockets...
+2017-09-04T15:54:39.516+1000 [signalProcessingThread] closing listening socket: 9
+2017-09-04T15:54:39.516+1000 [signalProcessingThread] closing listening socket: 10
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: going to flush diaglog...
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: going to close sockets...
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: waiting for fs preallocator...
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: lock for final commit...
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: final commit...
+2017-09-04T15:54:39.526+1000 [signalProcessingThread] shutdown: closing all files...
+2017-09-04T15:54:39.527+1000 [signalProcessingThread] closeAllFiles() finished
+2017-09-04T15:54:39.527+1000 [signalProcessingThread] journalCleanup...
+2017-09-04T15:54:39.527+1000 [signalProcessingThread] removeJournalFiles
+2017-09-04T15:54:39.527+1000 [signalProcessingThread] shutdown: removing fs lock...
+2017-09-04T15:54:39.527+1000 [signalProcessingThread] dbexit: really exiting now
