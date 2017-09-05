@@ -8,8 +8,6 @@ This is a very early beta version.
 
 ### Usage
 
-You need to have [mtools](https://github.com/rueckstiess/mtools) installed and linked in your `PYTHONPATH` in order for fruitsalad to work. Then run:
-
 ```
 python fruitsalad.py <logfile>
 ```
