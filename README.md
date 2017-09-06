@@ -14,6 +14,15 @@ python fruitsalad.py <logfile>
 
 to output the scrambled version to _stdout_, or redirect the output to a file by adding `> redacted.log` to the end of the command.
 
+### Tests
+
+`fruitsalad` uses [nose](https://github.com/nose-devs/nose) for testing. Please follow the instructions in the [nose documentation page](https://nose.readthedocs.io/en/latest/) for the recommended method to install nose. After nose is installed, testing could be done by running:
+
+```
+nosetests -v
+```
+
+in `fruitsalad`'s root directory. The `-v` is optional, and is only used to display a more verbose testing messages.
 
 ### DISCLAMER
 
