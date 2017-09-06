@@ -1,0 +1,90 @@
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] MongoDB starting : pid=99463 port=27017 dbpath=/data/db 64-bit host=local
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] db version v3.4.7
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] git version: cf38c1b8a0a8dca4a11737581beafef4fe120bcd
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 0.9.8zh 14 Jan 2016
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] allocator: system
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] modules: none
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] build environment:
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten]     distarch: x86_64
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten]     target_arch: x86_64
+2017-09-04T16:12:03.203+1000 I CONTROL  [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "113a0be68e2aab292bc66b585693e3af", wiredTiger: { engineConfig: { cacheSizeGB: 1.0 } } }, systemLog: { destination: "46bcb895313c0750321a43b7a47cdc87", logAppend: true, path: "7e9a35332969c662744a42ce0bb4dc2a" } }
+2017-09-04T16:12:03.204+1000 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=1024M,session_max=20000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),checkpoint=(wait=60,log_size=2GB),statistics_log=(wait=0),
+2017-09-04T16:12:03.815+1000 I CONTROL  [initandlisten]
+2017-09-04T16:12:03.815+1000 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2017-09-04T16:12:03.815+1000 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2017-09-04T16:12:03.815+1000 I CONTROL  [initandlisten]
+2017-09-04T16:12:03.939+1000 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory '/sandybrown.pear
+2017-09-04T16:12:04.222+1000 I INDEX    [initandlisten] build index on: admin.system.version properties: { v: 2, key: { version: 1 }, name: "bc4a8a865ba4cff1bc4872cd0de8b175", ns: "77b28b92e6540f833e380d9f8b53407d" }
+2017-09-04T16:12:04.222+1000 I INDEX    [initandlisten] 	 building index using bulk method; build may temporarily use up to 500 megabytes of RAM
+2017-09-04T16:12:04.236+1000 I INDEX    [initandlisten] build index done.  scanned 0 total records. 0 secs
+2017-09-04T16:12:04.236+1000 I COMMAND  [initandlisten] setting featureCompatibilityVersion to 3.4
+2017-09-04T16:12:04.236+1000 I NETWORK  [thread1] waiting for connections on port 27017
+2017-09-04T16:12:04.240+1000 I NETWORK  [thread1] connection accepted from 127.0.0.1:57134 #1 (1 connection now open)
+2017-09-04T16:12:04.248+1000 I -        [conn4] end connection 192.168.107.66:57137 (2 connections now open)
+2017-09-04T16:12:04.248+1000 I -        [conn3] end connection 192.168.107.66:57136 (2 connections now open)
+2017-09-04T16:12:07.365+1000 I NETWORK  [thread1] connection accepted from 192.168.107.66:57138 #5 (1 connection now open)
+2017-09-04T16:12:07.365+1000 I NETWORK  [conn5] received client metadata from 192.168.107.66:57138 conn5: { application: { name: "94a622f1747659c540bfa9f105de145f" }, driver: { name: "83c67e6f57c4fa51f4ac1565e74456b9", version: "a28f9918e19547698799858a6d65f46a" }, os: { type: "0ebb1448f597a99a0f73e9da2c2644be", name: "47b6216057388787126f850c1860ea8d", architecture: "270ae8f00c4f8a33677ce5f47a000a44", version: "264d624a1eed6d7aea5472819ab56933" } }
+2017-09-04T16:12:13.917+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:12:13.917+1000 I COMMAND  [conn5] command lightseagreen.$cmd appName: "94a622f1747659c540bfa9f105de145f" command: isMaster { isMaster: 1.0, forShell: 1.0 } numYields:0 reslen:174 locks:{} protocol:op_command 0ms
+2017-09-04T16:12:19.922+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec3c250e507159808f0'), key: 1.0 } ], ordered: true }
+2017-09-04T16:12:19.922+1000 D -        [conn5] reloading view catalog for database test
+2017-09-04T16:12:19.922+1000 D STORAGE  [conn5] create collection lightseagreen.lightseagreen {}
+2017-09-04T16:12:19.922+1000 D STORAGE  [conn5] stored meta data for lightseagreen.lightseagreen @ RecordId(4)
+2017-09-04T16:12:19.922+1000 D STORAGE  [conn5] WiredTigerKVEngine::createRecordStore uri: table:collection-5--873095094229448774 config: type=file,memory_page_max=10m,split_pct=90,leaf_value_max=64MB,checksum=on,block_compressor=snappy,,key_format=q,value_format=u,app_metadata=(formatVersion=1)
+2017-09-04T16:12:19.948+1000 D STORAGE  [conn5] WiredTigerUtil::checkApplicationMetadataFormatVersion  uri: table:collection-5--873095094229448774 ok range 1 -> 1 current: 1
+2017-09-04T16:12:19.948+1000 D STORAGE  [conn5] lightseagreen.lightseagreen: clearing plan cache - collection info cache reset
+2017-09-04T16:12:19.948+1000 D STORAGE  [conn5] WiredTigerKVEngine::createSortedDataInterface ident: index-6--873095094229448774 config: type=file,internal_page_max=16k,leaf_page_max=16k,checksum=on,prefix_compression=true,block_compressor=,,,,key_format=u,value_format=u,app_metadata=(formatVersion=8,infoObj={ "59b943d2fe6aede1820f470ac1e94e1a" : 2, "02ba83662661dcf7d3d3582a9f3e64f0" : { "ba446a583e8ec693391bce36164d9dc7" : 1 }, "984fecde60a13b93d99af5d40c85f9ee" : "ecd619ef9879c9ed846ac73b2aa533c7", "fd3dd255c469e25ec997b6577eb217ec" : "dbb3565f7116ced1ad598bb12d6cd05e" }),
+2017-09-04T16:12:19.948+1000 D STORAGE  [conn5] create uri: table:index-6--873095094229448774 config: type=file,internal_page_max=16k,leaf_page_max=16k,checksum=on,prefix_compression=true,block_compressor=,,,,key_format=u,value_format=u,app_metadata=(formatVersion=8,infoObj={ "59b943d2fe6aede1820f470ac1e94e1a" : 2, "02ba83662661dcf7d3d3582a9f3e64f0" : { "ba446a583e8ec693391bce36164d9dc7" : 1 }, "984fecde60a13b93d99af5d40c85f9ee" : "ecd619ef9879c9ed846ac73b2aa533c7", "fd3dd255c469e25ec997b6577eb217ec" : "dbb3565f7116ced1ad598bb12d6cd05e" }),
+2017-09-04T16:12:19.976+1000 D STORAGE  [conn5] WiredTigerUtil::checkApplicationMetadataFormatVersion  uri: table:index-6--873095094229448774 ok range 6 -> 8 current: 8
+2017-09-04T16:12:19.976+1000 D STORAGE  [conn5] lightseagreen.lightseagreen: clearing plan cache - collection info cache reset
+2017-09-04T16:12:19.977+1000 D INDEX    [conn5] marking index _id_ as ready in snapshot id 50
+2017-09-04T16:12:19.977+1000 D REPL     [conn5] Waiting for write concern. OpTime: { ts: Timestamp 0|0, t: -1 }, write concern: { w: 1, wtimeout: 0 }
+2017-09-04T16:12:19.977+1000 I COMMAND  [conn5] command lightseagreen.lightseagreen appName: "94a622f1747659c540bfa9f105de145f" command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec3c250e507159808f0'), key: 1.0 } ], ordered: true } ninserted:1 keysInserted:1 numYields:0 reslen:29 locks:{ Global: { acquireCount: { r: 3, w: 3 } }, Database: { acquireCount: { w: 2, W: 1 } }, Collection: { acquireCount: { w: 2 } } } protocol:op_command 55ms
+2017-09-04T16:12:19.979+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:12:19.980+1000 I COMMAND  [conn5] command lightseagreen.$cmd appName: "94a622f1747659c540bfa9f105de145f" command: isMaster { isMaster: 1.0, forShell: 1.0 } numYields:0 reslen:174 locks:{} protocol:op_command 0ms
+2017-09-04T16:12:22.712+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec6c250e507159808f1'), key: 2.0 } ], ordered: true }
+2017-09-04T16:12:22.712+1000 D REPL     [conn5] Waiting for write concern. OpTime: { ts: Timestamp 0|0, t: -1 }, write concern: { w: 1, wtimeout: 0 }
+2017-09-04T16:12:22.712+1000 I COMMAND  [conn5] command lightseagreen.lightseagreen appName: "94a622f1747659c540bfa9f105de145f" command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec6c250e507159808f1'), key: 2.0 } ], ordered: true } ninserted:1 keysInserted:1 numYields:0 reslen:29 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { w: 1 } } } protocol:op_command 0ms
+2017-09-04T16:12:22.715+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:12:22.715+1000 I COMMAND  [conn5] command lightseagreen.$cmd appName: "94a622f1747659c540bfa9f105de145f" command: isMaster { isMaster: 1.0, forShell: 1.0 } numYields:0 reslen:174 locks:{} protocol:op_command 0ms
+2017-09-04T16:12:24.707+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec8c250e507159808f2'), key: 3.0 } ], ordered: true }
+2017-09-04T16:12:24.707+1000 D REPL     [conn5] Waiting for write concern. OpTime: { ts: Timestamp 0|0, t: -1 }, write concern: { w: 1, wtimeout: 0 }
+2017-09-04T16:12:24.707+1000 I COMMAND  [conn5] command lightseagreen.lightseagreen appName: "94a622f1747659c540bfa9f105de145f" command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59aceec8c250e507159808f2'), key: 3.0 } ], ordered: true } ninserted:1 keysInserted:1 numYields:0 reslen:29 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { w: 1 } } } protocol:op_command 0ms
+2017-09-04T16:12:24.708+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:12:24.708+1000 I COMMAND  [conn5] command lightseagreen.$cmd appName: "94a622f1747659c540bfa9f105de145f" command: isMaster { isMaster: 1.0, forShell: 1.0 } numYields:0 reslen:174 locks:{} protocol:op_command 0ms
+2017-09-04T16:12:40.866+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { find: "303b5c8988601647873b4ffd247d83cb", filter: { lightgoldenrodyellow.western.raspberry: 1.0 } }
+2017-09-04T16:12:40.866+1000 D QUERY    [conn5] Only one plan is available; it will be run but will not be cached. query: { lightgoldenrodyellow.western.raspberry: 1.0 } sort: {} projection: {}, planSummary: COLLSCAN
+2017-09-04T16:12:40.866+1000 I COMMAND  [conn5] command lightseagreen.lightseagreen appName: "94a622f1747659c540bfa9f105de145f" command: find { find: "303b5c8988601647873b4ffd247d83cb", filter: { lightgoldenrodyellow.western.raspberry: 1.0 } } planSummary: COLLSCAN keysExamined:0 docsExamined:3 cursorExhausted:1 numYields:0 nreturned:0 reslen:82 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_command 0ms
+2017-09-04T16:12:40.867+1000 D COMMAND  [conn5] run command lightseagreen.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:12:40.867+1000 I COMMAND  [conn5] command lightseagreen.$cmd appName: "94a622f1747659c540bfa9f105de145f" command: isMaster { isMaster: 1.0, forShell: 1.0 } numYields:0 reslen:174 locks:{} protocol:op_command 0ms
+2017-09-04T16:12:42.631+1000 D NETWORK  [conn5] SocketException: remote: 192.168.107.66:57138 error: 9001 socket exception [CLOSED] server [192.168.107.66:57138]
+2017-09-04T16:12:42.631+1000 I -        [conn5] end connection 192.168.107.66:57138 (1 connection now open)
+2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 192.168.107.66:57139 #6 (1 connection now open)
+2017-09-04T16:12:48.001+1000 D COMMAND  [conn7] run command admin.$cmd { ping: 1 }
+2017-09-04T16:12:48.001+1000 I COMMAND  [conn7] command admin.$cmd command: ping { ping: 1 } numYields:0 reslen:37 locks:{} protocol:op_query 0ms
+2017-09-04T16:12:48.001+1000 D NETWORK  [conn6] SocketException: remote: 192.168.107.66:57139 error: 9001 socket exception [CLOSED] server [192.168.107.66:57139]
+2017-09-04T16:12:48.001+1000 D NETWORK  [conn7] SocketException: remote: 192.168.107.66:57140 error: 9001 socket exception [CLOSED] server [192.168.107.66:57140]
+2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 192.168.107.66:57139 (2 connections now open)
+2017-09-04T16:12:48.001+1000 I -        [conn7] end connection 192.168.107.66:57140 (2 connections now open)
+2017-09-04T16:12:48.020+1000 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2017-09-04T16:12:48.020+1000 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2017-09-04T16:12:48.020+1000 I NETWORK  [signalProcessingThread] closing listening socket: 8
+2017-09-04T16:12:48.020+1000 I NETWORK  [signalProcessingThread] closing listening socket: 9
+2017-09-04T16:12:48.021+1000 I NETWORK  [signalProcessingThread] removing socket file: /aliceblue.mango
+2017-09-04T16:12:48.021+1000 I NETWORK  [signalProcessingThread] shutdown: going to flush diaglog...
+2017-09-04T16:12:48.021+1000 D QUERY    [signalProcessingThread] received interrupt request for unknown op: 87  known ops:
+2017-09-04T16:12:48.021+1000 I FTDC     [signalProcessingThread] Shutting down full-time diagnostic data capture
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] ~WiredTigerRecordStore for: admin.system.version
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] ~WiredTigerRecordStore for: local.startup_log
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] ~WiredTigerRecordStore for: lightseagreen.lightseagreen
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] ~WiredTigerRecordStore for: _mdb_catalog
+2017-09-04T16:12:48.022+1000 I STORAGE  [signalProcessingThread] WiredTigerKVEngine shutting down
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] WiredTigerSizeStorer::storeInto table:_mdb_catalog -> { numRecords: 4, dataSize: 1341 }
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] WiredTigerSizeStorer::storeInto table:collection-0--873095094229448774 -> { numRecords: 1, dataSize: 1795 }
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] WiredTigerSizeStorer::storeInto table:collection-2--873095094229448774 -> { numRecords: 1, dataSize: 59 }
+2017-09-04T16:12:48.022+1000 D STORAGE  [signalProcessingThread] WiredTigerSizeStorer::storeInto table:collection-5--873095094229448774 -> { numRecords: 3, dataSize: 105 }
+2017-09-04T16:12:48.055+1000 D STORAGE  [WTJournalFlusher] stopping WTJournalFlusher thread
+2017-09-04T16:12:48.216+1000 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2017-09-04T16:12:48.217+1000 I CONTROL  [signalProcessingThread] now exiting
+2017-09-04T16:12:48.217+1000 I CONTROL  [signalProcessingThread] shutting down with code:0
+2017-09-04T16:12:48.217+1000 I CONTROL  [initandlisten] shutting down with code:0

@@ -1,0 +1,11 @@
+2017-08-25T22:23:49.097+0000 I COMMAND [conn0]
+2017-08-25T22:23:49.007+1000 I COMMAND [conn0]
+2017-09-04T12:07:36.596+1000 D COMMAND  [conn6] run command test.$cmd { find: "test", filter: { key: 1.0 } }
+2017-09-04T12:07:36.596+1000 D QUERY    [conn6] Only one plan is available; it will be run but will not be cached. query: { key: 1.0 } sort: {} projection: {}, planSummary: COLLSCAN
+2017-09-04T12:07:36.596+1000 I COMMAND  [conn6] command test.test appName: "MongoDB Shell" command: find { find: "test", filter: { key: 1.0 } } planSummary: COLLSCAN keysExamined:0 docsExamined:3 cursorExhausted:1 numYields:0 nreturned:1 reslen:118 locks:{ Global: { acquireCount: { r: 2 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_command 0ms
+2017-09-04T12:09:02.206+1000 D COMMAND  [conn7] run command test.$cmd { find: "test", filter: { arr.element: 1.0 } }
+2017-09-04T12:09:02.206+1000 D COMMAND  [conn7] run command test.$cmd { find: "test", filter: { array.element: 1.0 } }
+2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 10.0.0.1:57139 #6 (1 connection now open)
+2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 10.0.0.1:57139 (2 connections now open)
+2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 127.0.0.1:57139 #6 (1 connection now open)
+2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 127.0.0.1:57139 (2 connections now open)

@@ -1,0 +1,104 @@
+2017-09-04T15:59:46.839+1000 I CONTROL  [initandlisten] MongoDB starting : pid=98413 port=27017 dbpath=/data/db 64-bit host=mongodb.local
+2017-09-04T15:59:46.839+1000 I CONTROL  [initandlisten] db version v3.0.15
+2017-09-04T15:59:46.839+1000 I CONTROL  [initandlisten] git version: b8ff507269c382bc100fc52f75f48d54cd42ec3b
+2017-09-04T15:59:46.840+1000 I CONTROL  [initandlisten] build info: Darwin mci-osx1010-9.build.10gen.cc 14.0.0 Darwin Kernel Version 14.0.0: Fri Sep 19 00:26:44 PDT 2014; root:xnu-2782.1.97~2/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2017-09-04T15:59:46.840+1000 I CONTROL  [initandlisten] allocator: system
+2017-09-04T15:59:46.840+1000 I CONTROL  [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "/data/db" }, systemLog: { destination: "file", logAppend: true, path: "/data/mongod.log" } }
+2017-09-04T15:59:46.850+1000 I JOURNAL  [initandlisten] journal dir=/data/db/journal
+2017-09-04T15:59:46.851+1000 I JOURNAL  [initandlisten] recover : no journal files present, no recovery needed
+2017-09-04T15:59:46.863+1000 I JOURNAL  [durability] Durability thread started
+2017-09-04T15:59:46.863+1000 I JOURNAL  [journal writer] Journal writer thread started
+2017-09-04T15:59:46.867+1000 I INDEX    [initandlisten] allocating new ns file /data/db/local.ns, filling with zeroes...
+2017-09-04T15:59:46.911+1000 I STORAGE  [FileAllocator] allocating new datafile /data/db/local.0, filling with zeroes...
+2017-09-04T15:59:46.912+1000 I STORAGE  [FileAllocator] creating directory /data/db/_tmp
+2017-09-04T15:59:47.038+1000 I STORAGE  [FileAllocator] done allocating datafile /data/db/local.0, size: 64MB,  took 0.125 secs
+2017-09-04T15:59:47.074+1000 I NETWORK  [initandlisten] waiting for connections on port 27017
+2017-09-04T15:59:47.174+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57049 #1 (1 connection now open)
+2017-09-04T15:59:47.200+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57050 #2 (2 connections now open)
+2017-09-04T15:59:47.203+1000 I NETWORK  [conn2] end connection 127.0.0.1:57050 (1 connection now open)
+2017-09-04T15:59:47.203+1000 I NETWORK  [conn1] end connection 127.0.0.1:57049 (1 connection now open)
+2017-09-04T15:59:47.204+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57051 #3 (1 connection now open)
+2017-09-04T15:59:47.206+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57052 #4 (2 connections now open)
+2017-09-04T15:59:47.207+1000 I NETWORK  [conn3] end connection 127.0.0.1:57051 (1 connection now open)
+2017-09-04T15:59:47.207+1000 I NETWORK  [conn4] end connection 127.0.0.1:57052 (1 connection now open)
+2017-09-04T15:59:53.146+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57055 #5 (1 connection now open)
+2017-09-04T16:00:01.638+1000 D COMMAND  [conn5] run command test.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:00:01.638+1000 I COMMAND  [conn5] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:08.664+1000 D COMMAND  [conn5] run command admin.$cmd { isMaster: 1.0 }
+2017-09-04T16:00:08.664+1000 I COMMAND  [conn5] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:08.667+1000 D COMMAND  [conn5] run command test.$cmd { insert: "test", documents: [ { _id: ObjectId('59acebe810a460065a6b599a'), key: 1.0 } ], ordered: true }
+2017-09-04T16:00:08.668+1000 I INDEX    [conn5] allocating new ns file /data/db/test.ns, filling with zeroes...
+2017-09-04T16:00:08.726+1000 I STORAGE  [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
+2017-09-04T16:00:08.904+1000 I STORAGE  [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.177 secs
+2017-09-04T16:00:08.924+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:08.924+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:08.926+1000 D STORAGE  [conn5] allocating new extent
+2017-09-04T16:00:08.927+1000 D STORAGE  [conn5] MmapV1ExtentManager::allocateExtent desiredSize:4096 fromFreeList: 0 eloc: 0:4000
+2017-09-04T16:00:08.927+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:08.927+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:08.934+1000 D STORAGE  [conn5] test.system.indexes: clearing plan cache - collection info cache reset
+2017-09-04T16:00:08.934+1000 D STORAGE  [conn5] test.system.namespaces: clearing plan cache - collection info cache reset
+2017-09-04T16:00:08.934+1000 D STORAGE  [conn5] MmapV1ExtentManager::allocateExtent desiredSize:8192 fromFreeList: 0 eloc: 0:5000
+2017-09-04T16:00:08.934+1000 D STORAGE  [conn5] test.test: clearing plan cache - collection info cache reset
+2017-09-04T16:00:08.935+1000 D STORAGE  [conn5] allocating new extent
+2017-09-04T16:00:08.935+1000 D STORAGE  [conn5] MmapV1ExtentManager::allocateExtent desiredSize:8192 fromFreeList: 0 eloc: 0:7000
+2017-09-04T16:00:08.935+1000 D STORAGE  [conn5] allocating new extent
+2017-09-04T16:00:08.936+1000 D STORAGE  [conn5] MmapV1ExtentManager::allocateExtent desiredSize:131072 fromFreeList: 0 eloc: 0:9000
+2017-09-04T16:00:08.936+1000 D STORAGE  [conn5] test.test: clearing plan cache - collection info cache reset
+2017-09-04T16:00:08.936+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:08.936+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:08.937+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:08.937+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:08.937+1000 I WRITE    [conn5] insert test.test query: { _id: ObjectId('59acebe810a460065a6b599a'), key: 1.0 } ninserted:1 keyUpdates:0 writeConflicts:0 numYields:0 locks:{ Global: { acquireCount: { r: 2, w: 2 } }, MMAPV1Journal: { acquireCount: { w: 8 }, acquireWaitCount: { w: 1 }, timeAcquiringMicros: { w: 74 } }, Database: { acquireCount: { w: 1, W: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 4 } } } 269ms
+2017-09-04T16:00:08.937+1000 I COMMAND  [conn5] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acebe810a460065a6b599a'), key: 1.0 } ], ordered: true } keyUpdates:0 writeConflicts:0 numYields:0 reslen:40 locks:{ Global: { acquireCount: { r: 2, w: 2 } }, MMAPV1Journal: { acquireCount: { w: 8 }, acquireWaitCount: { w: 1 }, timeAcquiringMicros: { w: 74 } }, Database: { acquireCount: { w: 1, W: 1 } }, Collection: { acquireCount: { W: 1 } }, Metadata: { acquireCount: { W: 4 } } } 269ms
+2017-09-04T16:00:08.939+1000 D COMMAND  [conn5] run command test.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:00:08.939+1000 I COMMAND  [conn5] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:10.205+1000 D COMMAND  [conn5] run command test.$cmd { insert: "test", documents: [ { _id: ObjectId('59acebea10a460065a6b599b'), key: 2.0 } ], ordered: true }
+2017-09-04T16:00:10.205+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:10.206+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:10.206+1000 I WRITE    [conn5] insert test.test query: { _id: ObjectId('59acebea10a460065a6b599b'), key: 2.0 } ninserted:1 keyUpdates:0 writeConflicts:0 numYields:0 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } } } 0ms
+2017-09-04T16:00:10.206+1000 I COMMAND  [conn5] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acebea10a460065a6b599b'), key: 2.0 } ], ordered: true } keyUpdates:0 writeConflicts:0 numYields:0 reslen:40 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } } } 0ms
+2017-09-04T16:00:10.207+1000 D COMMAND  [conn5] run command test.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:00:10.207+1000 I COMMAND  [conn5] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:11.569+1000 D COMMAND  [conn5] run command test.$cmd { insert: "test", documents: [ { _id: ObjectId('59acebeb10a460065a6b599c'), key: 3.0 } ], ordered: true }
+2017-09-04T16:00:11.570+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
+2017-09-04T16:00:11.570+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
+2017-09-04T16:00:11.570+1000 I WRITE    [conn5] insert test.test query: { _id: ObjectId('59acebeb10a460065a6b599c'), key: 3.0 } ninserted:1 keyUpdates:0 writeConflicts:0 numYields:0 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } } } 0ms
+2017-09-04T16:00:11.570+1000 I COMMAND  [conn5] command test.$cmd command: insert { insert: "test", documents: [ { _id: ObjectId('59acebeb10a460065a6b599c'), key: 3.0 } ], ordered: true } keyUpdates:0 writeConflicts:0 numYields:0 reslen:40 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, MMAPV1Journal: { acquireCount: { w: 2 } }, Database: { acquireCount: { w: 1 } }, Collection: { acquireCount: { W: 1 } } } 0ms
+2017-09-04T16:00:11.571+1000 D COMMAND  [conn5] run command test.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:00:11.571+1000 I COMMAND  [conn5] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:17.402+1000 D QUERY    [conn5] Running query: query: { key: 1.0 } sort: {} projection: {} skip: 0 limit: 0
+2017-09-04T16:00:17.404+1000 D QUERY    [conn5] Only one plan is available; it will be run but will not be cached. query: { key: 1.0 } sort: {} projection: {} skip: 0 limit: 0, planSummary: COLLSCAN
+2017-09-04T16:00:17.405+1000 I COMMAND  [conn5] query test.test query: { key: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:3 keyUpdates:0 writeConflicts:0 numYields:0 nreturned:1 reslen:55 locks:{ Global: { acquireCount: { r: 2 } }, MMAPV1Journal: { acquireCount: { r: 1 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { R: 1 } } } 3ms
+2017-09-04T16:00:17.406+1000 D COMMAND  [conn5] run command test.$cmd { isMaster: 1.0, forShell: 1.0 }
+2017-09-04T16:00:17.406+1000 I COMMAND  [conn5] command test.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
+2017-09-04T16:00:23.932+1000 D NETWORK  [conn5] SocketException: remote: 127.0.0.1:57055 error: 9001 socket exception [CLOSED] server [127.0.0.1:57055] 
+2017-09-04T16:00:23.932+1000 I NETWORK  [conn5] end connection 127.0.0.1:57055 (0 connections now open)
+2017-09-04T16:00:26.731+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57058 #6 (1 connection now open)
+2017-09-04T16:00:26.734+1000 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57059 #7 (2 connections now open)
+2017-09-04T16:00:26.735+1000 D COMMAND  [conn7] run command admin.$cmd { ping: 1 }
+2017-09-04T16:00:26.736+1000 I COMMAND  [conn7] command admin.$cmd command: ping { ping: 1 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:37 locks:{} 0ms
+2017-09-04T16:00:26.736+1000 D NETWORK  [conn7] SocketException: remote: 127.0.0.1:57059 error: 9001 socket exception [CLOSED] server [127.0.0.1:57059] 
+2017-09-04T16:00:26.736+1000 D NETWORK  [conn6] SocketException: remote: 127.0.0.1:57058 error: 9001 socket exception [CLOSED] server [127.0.0.1:57058] 
+2017-09-04T16:00:26.736+1000 I NETWORK  [conn7] end connection 127.0.0.1:57059 (1 connection now open)
+2017-09-04T16:00:26.737+1000 I NETWORK  [conn6] end connection 127.0.0.1:57058 (1 connection now open)
+2017-09-04T16:00:26.755+1000 I CONTROL  [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
+2017-09-04T16:00:26.755+1000 I CONTROL  [signalProcessingThread] now exiting
+2017-09-04T16:00:26.756+1000 I NETWORK  [signalProcessingThread] shutdown: going to close listening sockets...
+2017-09-04T16:00:26.756+1000 I NETWORK  [signalProcessingThread] closing listening socket: 7
+2017-09-04T16:00:26.756+1000 I NETWORK  [signalProcessingThread] closing listening socket: 8
+2017-09-04T16:00:26.756+1000 I NETWORK  [signalProcessingThread] removing socket file: /tmp/mongodb-27017.sock
+2017-09-04T16:00:26.756+1000 I NETWORK  [signalProcessingThread] shutdown: going to flush diaglog...
+2017-09-04T16:00:26.757+1000 I NETWORK  [signalProcessingThread] shutdown: going to close sockets...
+2017-09-04T16:00:26.757+1000 I STORAGE  [signalProcessingThread] shutdown: waiting for fs preallocator...
+2017-09-04T16:00:26.757+1000 I STORAGE  [signalProcessingThread] shutdown: final commit...
+2017-09-04T16:00:26.767+1000 I JOURNAL  [signalProcessingThread] journalCleanup...
+2017-09-04T16:00:26.767+1000 I JOURNAL  [signalProcessingThread] removeJournalFiles
+2017-09-04T16:00:26.768+1000 D JOURNAL  [signalProcessingThread] removeJournalFiles end
+2017-09-04T16:00:26.768+1000 I JOURNAL  [signalProcessingThread] Terminating durability thread ...
+2017-09-04T16:00:26.867+1000 I JOURNAL  [journal writer] Journal writer thread stopped
+2017-09-04T16:00:26.867+1000 I JOURNAL  [durability] Durability thread stopped
+2017-09-04T16:00:26.868+1000 I STORAGE  [signalProcessingThread] shutdown: closing all files...
+2017-09-04T16:00:26.869+1000 I STORAGE  [signalProcessingThread] closeAllFiles() finished
+2017-09-04T16:00:26.870+1000 I STORAGE  [signalProcessingThread] shutdown: removing fs lock...
+2017-09-04T16:00:26.870+1000 I CONTROL  [signalProcessingThread] dbexit:  rc: 0
