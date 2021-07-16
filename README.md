@@ -1,6 +1,6 @@
 # fruitsalad
 
-A script to redact MongoDB log files. 
+A script to redact log files from MongoDB <= 4.2.X. fruitsalad is incompatible with logs from MongoDB 4.4+. 
 
 This script reads a MongoDB log file and outputs a redacted version of the log file, replacing IP addresses, namespaces and query/update data. Namespace details are replaced with generic adjectives, colours and fruit names (hence the name "fruitsalad"). IP addresses are mapped to a private range starting with `192.168.`. The query values are hashed with a standard MD5 algorithm, so that the distribution of data remains unchanged, while the actual data will be lost. Note: The **field names** of the queries are currently left **unchanged**.
 
