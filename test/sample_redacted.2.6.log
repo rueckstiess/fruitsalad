@@ -1,12 +1,12 @@
-2017-09-04T15:53:44.521+1000 [initandlisten] MongoDB starting : pid=98141 port=27017 dbpath=/data/db 64-bit sandybrown.pear
+2017-09-04T15:53:44.521+1000 [initandlisten] MongoDB starting : pid=98141 port=27017 dbpath=/data/db 64-bit mistyrose.cantaloupe
 2017-09-04T15:53:44.521+1000 [initandlisten] db version v2.6.12
 2017-09-04T15:53:44.521+1000 [initandlisten] git version: d73c92b1c85703828b55c2916a5dd4ad46535f6a
-2017-09-04T15:53:44.521+1000 [initandlisten] build info: Darwin hot.famous.lightseagreen.jambul 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2017-09-04T15:53:44.521+1000 [initandlisten] build info: Darwin lavish.rancid.hotpink.blueberry 12.5.0 Darwin Kernel Version 12.5.0: Sun Sep 29 13:33:47 PDT 2013; root:xnu-2050.48.12~1/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
 2017-09-04T15:53:44.521+1000 [initandlisten] allocator: system
 2017-09-04T15:53:44.521+1000 [initandlisten] options: { net: { port: 27017 }, processManagement: { fork: true }, storage: { dbPath: "113a0be68e2aab292bc66b585693e3af" }, systemLog: { destination: "46bcb895313c0750321a43b7a47cdc87", logAppend: true, path: "7e9a35332969c662744a42ce0bb4dc2a" } }
 2017-09-04T15:53:44.522+1000 [initandlisten] journal dir=/data/db/journal
 2017-09-04T15:53:44.523+1000 [initandlisten] recover : no journal files present, no recovery needed
-2017-09-04T15:53:44.535+1000 [initandlisten] allocating new ns file /pink.goji.berry filling with zeroes...
+2017-09-04T15:53:44.535+1000 [initandlisten] allocating new ns file /darkgreen.banana filling with zeroes...
 2017-09-04T15:53:44.565+1000 [FileAllocator] allocating new datafile /data/db/local.0, filling with zeroes...
 2017-09-04T15:53:44.565+1000 [FileAllocator] creating directory /data/db/_tmp
 2017-09-04T15:53:44.679+1000 [FileAllocator] done allocating datafile /data/db/local.0, size: 64MB,  took 0.112 secs
@@ -25,28 +25,28 @@
 2017-09-04T15:53:49.531+1000 [initandlisten] connection accepted from 127.0.0.1:57017 #5 (1 connection now open)
 2017-09-04T15:54:06.065+1000 [conn5] end connection 127.0.0.1:57017 (0 connections now open)
 2017-09-04T15:54:08.781+1000 [initandlisten] connection accepted from 127.0.0.1:57019 #6 (1 connection now open)
-2017-09-04T15:54:13.452+1000 [conn6] creating profile collection: leathery.mediumaquamarine.salal.berry
-2017-09-04T15:54:13.453+1000 [conn6] allocating new ns file /lightsalmon.goji.berry filling with zeroes...
+2017-09-04T15:54:13.452+1000 [conn6] creating profile collection: indulgent.oldlace.gooseberry
+2017-09-04T15:54:13.453+1000 [conn6] allocating new ns file /lightgray.banana filling with zeroes...
 2017-09-04T15:54:13.499+1000 [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
 2017-09-04T15:54:13.596+1000 [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.097 secs
-2017-09-04T15:54:13.602+1000 [conn6] command leathery.$cmd command: profile { profile: 2.0, slowms: -1.0 } keyUpdates:0 numYields:0 locks(micros) w:149813 reslen:58 149ms
-2017-09-04T15:54:13.605+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:13.602+1000 [conn6] command indulgent.$cmd command: profile { profile: 2.0, slowms: -1.0 } keyUpdates:0 numYields:0 locks(micros) w:149813 reslen:58 149ms
+2017-09-04T15:54:13.605+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
 2017-09-04T15:54:20.630+1000 [conn6] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2017-09-04T15:54:20.635+1000 [conn6] build index on: leathery.leathery properties: { v: 1, key: { _id: 1 }, name: "ecd619ef9879c9ed846ac73b2aa533c7", ns: "dbb3565f7116ced1ad598bb12d6cd05e" }
+2017-09-04T15:54:20.635+1000 [conn6] build index on: indulgent.indulgent properties: { v: 1, key: { _id: 1 }, name: "ecd619ef9879c9ed846ac73b2aa533c7", ns: "dbb3565f7116ced1ad598bb12d6cd05e" }
 2017-09-04T15:54:20.635+1000 [conn6] 	 added index to empty collection
-2017-09-04T15:54:20.635+1000 [conn6] insert leathery.leathery query: { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:2561 2ms
-2017-09-04T15:54:20.636+1000 [conn6] command leathery.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:228 reslen:40 3ms
-2017-09-04T15:54:20.637+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2017-09-04T15:54:21.929+1000 [conn6] insert leathery.leathery query: { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:119 0ms
-2017-09-04T15:54:21.930+1000 [conn6] command leathery.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:423 reslen:40 0ms
-2017-09-04T15:54:21.931+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2017-09-04T15:54:23.163+1000 [conn6] insert leathery.leathery query: { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:35 0ms
-2017-09-04T15:54:23.163+1000 [conn6] command leathery.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:402 reslen:40 0ms
-2017-09-04T15:54:23.164+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2017-09-04T15:54:29.589+1000 [conn6] query leathery.leathery query: { key: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:1046 nreturned:1 reslen:55 1ms
-2017-09-04T15:54:29.590+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
-2017-09-04T15:54:34.580+1000 [conn6] query leathery.leathery query: { lime.apricot: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:112 nreturned:0 reslen:20 0ms
-2017-09-04T15:54:34.581+1000 [conn6] command leathery.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:20.635+1000 [conn6] insert indulgent.indulgent query: { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:2561 2ms
+2017-09-04T15:54:20.636+1000 [conn6] command indulgent.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8c9a7d895b81bf6052'), key: 1.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:228 reslen:40 3ms
+2017-09-04T15:54:20.637+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:21.929+1000 [conn6] insert indulgent.indulgent query: { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:119 0ms
+2017-09-04T15:54:21.930+1000 [conn6] command indulgent.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8d9a7d895b81bf6053'), key: 2.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:423 reslen:40 0ms
+2017-09-04T15:54:21.931+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:23.163+1000 [conn6] insert indulgent.indulgent query: { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ninserted:1 keyUpdates:0 numYields:0 locks(micros) w:35 0ms
+2017-09-04T15:54:23.163+1000 [conn6] command indulgent.$cmd command: insert { insert: "303b5c8988601647873b4ffd247d83cb", documents: [ { _id: ObjectId('59acea8f9a7d895b81bf6054'), key: 3.0 } ], ordered: true } keyUpdates:0 numYields:0 locks(micros) w:402 reslen:40 0ms
+2017-09-04T15:54:23.164+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:29.589+1000 [conn6] query indulgent.indulgent query: { key: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:1046 nreturned:1 reslen:55 1ms
+2017-09-04T15:54:29.590+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
+2017-09-04T15:54:34.580+1000 [conn6] query indulgent.indulgent query: { aquamarine.bell.pepper: 1.0 } planSummary: COLLSCAN ntoreturn:0 ntoskip:0 nscanned:3 nscannedObjects:3 keyUpdates:0 numYields:0 locks(micros) r:112 nreturned:0 reslen:20 0ms
+2017-09-04T15:54:34.581+1000 [conn6] command indulgent.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
 2017-09-04T15:54:35.837+1000 [conn6] end connection 127.0.0.1:57019 (0 connections now open)
 2017-09-04T15:54:39.491+1000 [initandlisten] connection accepted from 127.0.0.1:57020 #7 (1 connection now open)
 2017-09-04T15:54:39.495+1000 [initandlisten] connection accepted from 127.0.0.1:57021 #8 (2 connections now open)
@@ -59,7 +59,7 @@
 2017-09-04T15:54:39.516+1000 [signalProcessingThread] shutdown: going to close listening sockets...
 2017-09-04T15:54:39.516+1000 [signalProcessingThread] closing listening socket: 9
 2017-09-04T15:54:39.516+1000 [signalProcessingThread] closing listening socket: 10
-2017-09-04T15:54:39.517+1000 [signalProcessingThread] removing socket file: /indianred.pomelo
+2017-09-04T15:54:39.517+1000 [signalProcessingThread] removing socket file: /peru.cherry
 2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: going to flush diaglog...
 2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: going to close sockets...
 2017-09-04T15:54:39.517+1000 [signalProcessingThread] shutdown: waiting for fs preallocator...

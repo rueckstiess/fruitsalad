@@ -8,7 +8,7 @@ class TestFruitSalad(unittest.TestCase):
 
     def setUp(self):
         self.saved_stdout = sys.stdout
-        self.stdout = io.BytesIO()
+        self.stdout = io.StringIO()
         sys.stdout = self.stdout
 
     def tearDown(self):
@@ -27,15 +27,15 @@ class TestFruitSalad(unittest.TestCase):
         tool = FruitSaladTool(arg_logfile='test/sample.ts.log', arg_seed=0)
         tool.run()
         output = self.stdout.getvalue().split('\n')
-        self.assertEqual(output[2], '2017-09-04T12:07:36.596+1000 D COMMAND  [conn6] run command sandybrown.$cmd { find: "303b5c8988601647873b4ffd247d83cb", filter: { key: 1.0 } }')
+        self.assertEqual(output[2], '2017-09-04T12:07:36.596+1000 D COMMAND  [conn6] run command mistyrose.$cmd { find: "303b5c8988601647873b4ffd247d83cb", filter: { key: 1.0 } }')
 
     def test_ip_1(self):
         ''' IP addresses not 127.0.0.1 should be redacted '''
         tool = FruitSaladTool(arg_logfile='test/sample.ts.log', arg_seed=0)
         tool.run()
         output = self.stdout.getvalue().split('\n')
-        self.assertEqual(output[7], '2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 192.168.148.231:57139 #6 (1 connection now open)')
-        self.assertEqual(output[8], '2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 192.168.148.231:57139 (2 connections now open)')
+        self.assertEqual(output[9], '2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 127.0.0.1:57139 #6 (1 connection now open)')
+        self.assertEqual(output[10], '2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 127.0.0.1:57139 (2 connections now open)')
 
     def test_ip_2(self):
         ''' IP addresses 127.0.0.1 should not be redacted '''
@@ -83,4 +83,12 @@ class TestFruitSalad(unittest.TestCase):
         tool.run()
         output = self.stdout.getvalue().split('\n')
         for sample in zip([line.strip() for line in open('test/sample_redacted.3.4.log', 'r')], output):
+            self.assertEqual(sample[0], sample[1])
+
+    def test_4_4(self):
+        ''' MongoDB 4.4 log file should be redacted '''
+        tool = FruitSaladTool(arg_logfile='test/sample.4.4.log', arg_seed=0)
+        tool.run()
+        output = self.stdout.getvalue().split('\n')
+        for sample in zip([line.strip() for line in open('test/sample_redacted.4.4.log', 'r')], output):
             self.assertEqual(sample[0], sample[1])
