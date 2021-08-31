@@ -98,6 +98,7 @@ class FruitSaladTool():
     def _replace_string(self, match):
         return '"' + hashlib.md5(str(match.group(0)).encode('utf-8')).hexdigest() + '"'
 
+
     def _obfuscate_user(self, data, path):
         user = self._get_by_path(data, path)
         if user is None or user in ['__system']:
@@ -109,6 +110,9 @@ class FruitSaladTool():
         ns = self._get_by_path(data, path)
         if ns is None:
             return
+        # Dont obfuscate well known system namespaces
+        if ns in ['local.oplog.rs', 'oplog.rs']:
+            return ns
         parts = ns.split('.')
         replaced = []
         for i, part in enumerate(parts):
@@ -131,14 +135,12 @@ class FruitSaladTool():
         obj = self._get_by_path(data, path)
         if obj is None:
             return
+        if obj == {}:
+            return {}
         command = json.dumps(obj)
         hash = self.replacements.setdefault(
             command, hashlib.md5(command.encode('utf-8')).hexdigest())
         self._set_by_path(data, path, hash)
-
-
-    def _obfuscate_plan_keys(self, match):
-        return
 
 
     def _obfuscate_plan(self, match):
@@ -150,8 +152,10 @@ class FruitSaladTool():
 
 
     def _obfuscate_planSummary(self, data):
-        plan = json.dumps(self._get_by_path(
-            data, "attr.planSummary")).strip('"')
+        planSummary = self._get_by_path(data, "attr.planSummary")
+        if planSummary is None:
+            return
+        plan = json.dumps(planSummary).strip('"')
         obfuscated_plan = re.sub(r'(\w+) ({[^}]+},?)',
                                  self._obfuscate_plan, plan)
         self._set_by_path(data, "attr.planSummary", obfuscated_plan)
@@ -165,6 +169,34 @@ class FruitSaladTool():
             doc[self.replacements.setdefault(key, choice(fruits))] = obj[key]
         self._set_by_path(data, path, doc)
 
+
+    def _obfuscate_truncation(self, data):
+        obj = self._get_by_path(data, "truncated")
+        if obj is None:
+            return
+        for key in obj.keys():
+            for subkey in obj.get(key, {}):
+                self._obfuscate_command(
+                    data, "truncated." + key + '.' + subkey)
+
+
+    def _obfuscate_stats(self, data):
+        path = "attr.stats.inputStage.inputStages"
+        obj = self._get_by_path(data, path)
+        if obj is None:
+            print('none')
+            return
+        for stage in obj:
+            if stage == {}:
+                continue
+            for val in ["filter", "keyPattern", "indexName", "multiKeyPaths", "indexBounds"]:
+                if val not in stage:
+                    continue
+                raw = json.dumps(stage[val])
+                stage[val] = self.replacements.setdefault(
+                    raw, hashlib.md5(raw.encode('utf-8')).hexdigest())
+        self._set_by_path(data, path, obj)
+    
 
     def run(self):
         """ Print out useful information about the log file. """
@@ -197,13 +229,21 @@ class FruitSaladTool():
                     if re.match(r'^\s*$', line):
                         continue
                     sys.stderr.write('Error reading line ' +
-                          str(line_counter) + ' from ' + self.logfile + '\n\n')
+                                     str(line_counter) + ' from ' + self.logfile + '\n\n')
                     traceback.print_exc()
                     sys.stderr.write('\nRaw JSON:\n')
                     sys.stderr.write(line + '\n')
                     sys.exit()
 
                 try:
+                    # PII is only found in .attr
+                    if "attr" not in loaded_line:
+                        print(json.dumps(loaded_line))
+                        continue
+
+                    if "truncated" in loaded_line:
+                        self._obfuscate_truncation(loaded_line)
+
                     self._obfuscate_command(loaded_line, "attr.reason")
                     self._obfuscate_command(loaded_line, "attr.indexName")
 
@@ -214,56 +254,79 @@ class FruitSaladTool():
 
                     self._obfuscate_namespace(
                         loaded_line, "attr.namespace")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.sourceNamespace")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.targetNamespace")
 
-                    if self._get_by_path(loaded_line, "attr.type") == "command":
-                        self._obfuscate_namespace(loaded_line, "attr.ns")
+                    self._obfuscate_namespace(loaded_line, "attr.ns")
+                    self._obfuscate_namespace(loaded_line, "attr.fromName")
+                    self._obfuscate_namespace(loaded_line, "attr.toName")
+                    self._obfuscate_namespace(loaded_line, "attr.command.$db")
+
+                    self._obfuscate_command(
+                        loaded_line, "attr.command.q")
+                    self._obfuscate_command(
+                        loaded_line, "attr.command.u")
+                    self._obfuscate_command(
+                        loaded_line, "attr.command.pipeline")
+                    self._obfuscate_command(
+                        loaded_line, "attr.command.filter")
+                    self._obfuscate_command(
+                        loaded_line, "attr.command.query")
+
+                    self._obfuscate_command(
+                        loaded_line, "attr.error.errmsg")
+
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.aggregate")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.find")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.update")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.insert")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.delete")
+
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.killCursors")
+                    self._obfuscate_namespace(
+                        loaded_line, "attr.command.collection")
+
+                    self._obfuscate_keys(
+                        loaded_line, "attr.command.sort")
+
+                    self._obfuscate_planSummary(loaded_line)
+
+                    self._obfuscate_namespace(loaded_line, "attr.CRUD.ns")
+                    self._obfuscate_command(loaded_line, "attr.CRUD.o")
+
+                    if loaded_line.get('attr', {}).get('originatingCommand', None) is not None:
                         self._obfuscate_namespace(
-                            loaded_line, "attr.command.$db")
-                        self._obfuscate_planSummary(loaded_line)
-
-                        if "aggregate" in loaded_line["attr"]["command"]:
-                            self._obfuscate_namespace(
-                                loaded_line, "attr.command.aggregate")
-                            self._obfuscate_command(
-                                loaded_line, "attr.command.pipeline")
-
-                        if "find" in loaded_line["attr"]["command"]:
-                            self._obfuscate_namespace(
-                                loaded_line, "attr.command.find")
-                            self._obfuscate_command(
-                                loaded_line, "attr.command.filter")
-                            self._obfuscate_keys(
-                                loaded_line, "attr.command.sort")
-
-                        if "update" in loaded_line["attr"]["command"]:
-                            self._obfuscate_namespace(
-                                loaded_line, "attr.command.update")
-
-                        if "insert" in loaded_line["attr"]["command"]:
-                            self._obfuscate_namespace(
-                                loaded_line, "attr.command.insert")
-
-                        if "count" in loaded_line["attr"]["command"]:
-                            self._obfuscate_command(
-                                loaded_line, "attr.command.query")
-
-                    if "error" in loaded_line["attr"]:
+                            loaded_line, "attr.originatingCommand.find")
                         self._obfuscate_command(
-                            loaded_line, "attr.error.errmsg")
-
-                    if "CRUD" in loaded_line["attr"]:
-                        self._obfuscate_namespace(loaded_line, "attr.CRUD.ns")
-                        self._obfuscate_command(loaded_line, "attr.CRUD.o")
+                            loaded_line, "attr.originatingCommand.aggregate")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.originatingCommand.$db")
                         self._obfuscate_command(
-                            loaded_line, "truncated.CRUD.o")
-                except Exception as e:
-                    print()
-                    print('[ERROR]: ' + str(e))
-                    print(json.dumps(loaded_line))
+                            loaded_line, "attr.originatingCommand.filter")
+                        self._obfuscate_command(
+                            loaded_line, "attr.originatingCommand.projection")
+
+                    if loaded_line.get('attr', {}).get('stats', None) is not None:
+                        self._obfuscate_stats(loaded_line)
+
+                except Exception:
+                    sys.stderr.write('Error processing line ' +
+                                     str(line_counter) + ' from ' + self.logfile + '\n\n')
+                    traceback.print_exc()
+                    sys.stderr.write('\nRaw JSON:\n')
+                    sys.stderr.write(line + '\n')
                     sys.exit()
-    
+
                 print(json.dumps(loaded_line))
-    
+
 
     def _get_logtype(self):
         with open(self.logfile, 'r') as f:
