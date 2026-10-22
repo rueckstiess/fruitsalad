@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from enum import Enum
 from random import seed, randrange, choice
@@ -204,133 +204,139 @@ class FruitSaladTool():
         if self.seed != None:
             seed(self.seed)
         line_counter = 0
-        for logevent in open(self.logfile, 'r'):
-            line = logevent
+        # The handle has to stay open for the whole scan and close when the
+        # scan finishes. Leaving it to the garbage collector warns on 3.14
+        # and leaks a descriptor if run() is called in a loop.
+        with open(self.logfile, 'r', encoding='utf-8') as handle:
+            for logevent in handle:
+                line = logevent
 
-            # replace IP addresses, ignore version strings
-            line = re.sub(r'([^\w])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})([^\w])',
-                          self._replace_ip, line)
+                # replace IP addresses, ignore version strings
+                line = re.sub(r'([^\w])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})([^\w])',
+                              self._replace_ip, line)
 
-            if self.logtype == LogType.TEXT:
-                # replace strings
-                line = re.sub(r'".+?"', self._replace_string, line)
+                if self.logtype == LogType.TEXT:
+                    # replace strings
+                    line = re.sub(r'".+?"', self._replace_string, line)
 
-                # replace hostnames and namespaces
-                line = re.sub(
-                    r'[a-zA-Z$][^ \t\n\r\f\v:\'"]+(\.[a-zA-Z$][^ \t\n\r\f\v:\'"]+)+',
-                    self._replace_dottedname, line)
-                sys.stdout.write(line.rstrip() + '\n')
+                    # replace hostnames and namespaces
+                    line = re.sub(
+                        r'[a-zA-Z$][^ \t\n\r\f\v:\'"]+(\.[a-zA-Z$][^ \t\n\r\f\v:\'"]+)+',
+                        self._replace_dottedname, line)
+                    sys.stdout.write(line.rstrip() + '\n')
 
-            elif self.logtype == LogType.JSON:
-                try:
-                    line_counter = line_counter + 1
-                    loaded_line = json.loads(line)
-                except json.decoder.JSONDecodeError as e:
-                    if re.match(r'^\s*$', line):
-                        continue
-                    sys.stderr.write('Error reading line ' +
-                                     str(line_counter) + ' from ' + self.logfile + '\n\n')
-                    traceback.print_exc()
-                    sys.stderr.write('\nRaw JSON:\n')
-                    sys.stderr.write(line + '\n')
-                    sys.exit()
+                elif self.logtype == LogType.JSON:
+                    try:
+                        line_counter = line_counter + 1
+                        loaded_line = json.loads(line)
+                    except json.decoder.JSONDecodeError as e:
+                        if re.match(r'^\s*$', line):
+                            continue
+                        sys.stderr.write('Error reading line ' +
+                                         str(line_counter) + ' from ' + self.logfile + '\n\n')
+                        traceback.print_exc()
+                        sys.stderr.write('\nRaw JSON:\n')
+                        sys.stderr.write(line + '\n')
+                        sys.exit()
 
-                try:
-                    # PII is only found in .attr
-                    if "attr" not in loaded_line:
-                        print(json.dumps(loaded_line))
-                        continue
+                    try:
+                        # PII is only found in .attr
+                        if "attr" not in loaded_line:
+                            print(json.dumps(loaded_line))
+                            continue
 
-                    if "truncated" in loaded_line:
-                        self._obfuscate_truncation(loaded_line)
+                        if "truncated" in loaded_line:
+                            self._obfuscate_truncation(loaded_line)
 
-                    self._obfuscate_command(loaded_line, "attr.reason")
-                    self._obfuscate_command(loaded_line, "attr.indexName")
+                        self._obfuscate_command(loaded_line, "attr.reason")
+                        self._obfuscate_command(loaded_line, "attr.indexName")
 
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.authenticationDatabase")
-                    self._obfuscate_user(
-                        loaded_line, "attr.principalName")
-
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.namespace")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.sourceNamespace")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.targetNamespace")
-
-                    self._obfuscate_namespace(loaded_line, "attr.ns")
-                    self._obfuscate_namespace(loaded_line, "attr.fromName")
-                    self._obfuscate_namespace(loaded_line, "attr.toName")
-                    self._obfuscate_namespace(loaded_line, "attr.command.$db")
-
-                    self._obfuscate_command(
-                        loaded_line, "attr.command.q")
-                    self._obfuscate_command(
-                        loaded_line, "attr.command.u")
-                    self._obfuscate_command(
-                        loaded_line, "attr.command.pipeline")
-                    self._obfuscate_command(
-                        loaded_line, "attr.command.filter")
-                    self._obfuscate_command(
-                        loaded_line, "attr.command.query")
-
-                    self._obfuscate_command(
-                        loaded_line, "attr.error.errmsg")
-
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.aggregate")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.find")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.update")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.insert")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.delete")
-
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.killCursors")
-                    self._obfuscate_namespace(
-                        loaded_line, "attr.command.collection")
-
-                    self._obfuscate_keys(
-                        loaded_line, "attr.command.sort")
-
-                    self._obfuscate_planSummary(loaded_line)
-
-                    self._obfuscate_namespace(loaded_line, "attr.CRUD.ns")
-                    self._obfuscate_command(loaded_line, "attr.CRUD.o")
-
-                    if loaded_line.get('attr', {}).get('originatingCommand', None) is not None:
                         self._obfuscate_namespace(
-                            loaded_line, "attr.originatingCommand.find")
-                        self._obfuscate_command(
-                            loaded_line, "attr.originatingCommand.aggregate")
+                            loaded_line, "attr.authenticationDatabase")
+                        self._obfuscate_user(
+                            loaded_line, "attr.principalName")
+
                         self._obfuscate_namespace(
-                            loaded_line, "attr.originatingCommand.$db")
+                            loaded_line, "attr.namespace")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.sourceNamespace")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.targetNamespace")
+
+                        self._obfuscate_namespace(loaded_line, "attr.ns")
+                        self._obfuscate_namespace(loaded_line, "attr.fromName")
+                        self._obfuscate_namespace(loaded_line, "attr.toName")
+                        self._obfuscate_namespace(loaded_line, "attr.command.$db")
+
                         self._obfuscate_command(
-                            loaded_line, "attr.originatingCommand.filter")
+                            loaded_line, "attr.command.q")
                         self._obfuscate_command(
-                            loaded_line, "attr.originatingCommand.projection")
+                            loaded_line, "attr.command.u")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.pipeline")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.filter")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.query")
 
-                    if loaded_line.get('attr', {}).get('stats', None) is not None:
-                        self._obfuscate_stats(loaded_line)
+                        self._obfuscate_command(
+                            loaded_line, "attr.error.errmsg")
 
-                except Exception:
-                    sys.stderr.write('Error processing line ' +
-                                     str(line_counter) + ' from ' + self.logfile + '\n\n')
-                    traceback.print_exc()
-                    sys.stderr.write('\nRaw JSON:\n')
-                    sys.stderr.write(line + '\n')
-                    sys.exit()
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.aggregate")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.find")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.update")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.insert")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.delete")
 
-                print(json.dumps(loaded_line))
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.killCursors")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.collection")
+
+                        self._obfuscate_keys(
+                            loaded_line, "attr.command.sort")
+
+                        self._obfuscate_planSummary(loaded_line)
+
+                        self._obfuscate_namespace(loaded_line, "attr.CRUD.ns")
+                        self._obfuscate_command(loaded_line, "attr.CRUD.o")
+
+                        if loaded_line.get('attr', {}).get('originatingCommand', None) is not None:
+                            self._obfuscate_namespace(
+                                loaded_line, "attr.originatingCommand.find")
+                            self._obfuscate_command(
+                                loaded_line, "attr.originatingCommand.aggregate")
+                            self._obfuscate_namespace(
+                                loaded_line, "attr.originatingCommand.$db")
+                            self._obfuscate_command(
+                                loaded_line, "attr.originatingCommand.filter")
+                            self._obfuscate_command(
+                                loaded_line, "attr.originatingCommand.projection")
+
+                        if loaded_line.get('attr', {}).get('stats', None) is not None:
+                            self._obfuscate_stats(loaded_line)
+
+                    except Exception:
+                        sys.stderr.write('Error processing line ' +
+                                         str(line_counter) + ' from ' + self.logfile + '\n\n')
+                        traceback.print_exc()
+                        sys.stderr.write('\nRaw JSON:\n')
+                        sys.stderr.write(line + '\n')
+                        sys.exit()
+
+                    print(json.dumps(loaded_line))
 
 
     def _get_logtype(self):
-        with open(self.logfile, 'r') as f:
-            line = f.readline()
+        # Read the same way run() does. A locale encoding here and UTF-8
+        # later would split multi-byte characters on non-UTF-8 machines.
+        with open(self.logfile, 'r', encoding='utf-8') as handle:
+            line = handle.readline()
             if line[0] == '{':
                 return LogType.JSON
             else:
@@ -358,13 +364,19 @@ class FruitSaladTool():
         obj[keys[-1]] = value
 
 
-if __name__ == '__main__':
+def main(argv=None):
+    """Command-line entry point. Installed scripts call this directly."""
     argparser = argparse.ArgumentParser()
     argparser.description = 'Anonymizes log files by replacing IP addresses, namespaces, strings.'
     argparser.add_argument('--seed', '-s', action='store', metavar='S',
                            default=None, help='seed the random number generator with S (any string)')
     argparser.add_argument('logfile', type=str)
-    args = argparser.parse_args()
+    args = argparser.parse_args(argv)
 
     tool = FruitSaladTool(arg_seed=args.seed, arg_logfile=args.logfile)
     tool.run()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
