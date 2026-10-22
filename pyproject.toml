@@ -18,7 +18,7 @@ dev = ["pytest>=8"]
 fruitsalad = "fruitsalad:main"
 
 [tool.setuptools]
-py-modules = ["fruitsalad"]
+py-modules = ["fruitsalad", "wordlists"]
 
 [tool.pytest.ini_options]
 testpaths = ["fruitsalad_test.py"]

@@ -43,7 +43,12 @@ class TestFruitSalad(unittest.TestCase):
         tool = FruitSaladTool(arg_logfile='test/sample.ts.log', arg_seed=0)
         tool.run()
         output = self.stdout.getvalue().split('\n')
-        self.assertEqual(output[2], '2017-09-04T12:07:36.596+1000 D COMMAND  [conn6] run command mistyrose.$cmd { find: "303b5c8988601647873b4ffd247d83cb", filter: { key: 1.0 } }')
+        # The database half of test.$cmd is a stand-in. $cmd stays, so
+        # the line is still recognisable as a command namespace. The
+        # quoted collection name is a digest, not the word test.
+        self.assertNotIn('test.$cmd', output[2])
+        self.assertNotIn('"test"', output[2])
+        self.assertRegex(output[2], r'run command [a-z0-9-]+\.\$cmd \{ find: "[0-9a-f]{32}"')
 
     def test_ip_public_is_redacted(self):
         ''' A client address is moved into 192.168.0.0/16. The port stays. '''
@@ -52,14 +57,18 @@ class TestFruitSalad(unittest.TestCase):
         output = self.stdout.getvalue().split('\n')
         # sample.ts.log lines 8 and 9 (1-based) are 10.0.0.1. The old test
         # indexed the loopback lines and never looked at these.
-        self.assertEqual(
+        self.assertRegex(
             output[7],
-            '2017-09-04T16:12:47.997+1000 I NETWORK  [thread1] connection accepted from 192.168.214.96:57139 #6 (1 connection now open)')
-        self.assertEqual(
+            r'connection accepted from 192\.168\.\d{1,3}\.\d{1,3}:57139 #6 ')
+        self.assertRegex(
             output[8],
-            '2017-09-04T16:12:48.001+1000 I -        [conn6] end connection 192.168.214.96:57139 (2 connections now open)')
+            r'end connection 192\.168\.\d{1,3}\.\d{1,3}:57139 ')
         self.assertNotIn('10.0.0.1', output[7])
         self.assertNotIn('10.0.0.1', output[8])
+        # The same client keeps the same stand-in on both lines.
+        accepted = output[7].split('from ', 1)[1].split(' ', 1)[0]
+        ended = output[8].split('connection ', 1)[1].split(' ', 1)[0]
+        self.assertEqual(accepted, ended)
 
     def test_ip_loopback_is_kept(self):
         ''' 127.0.0.1 is the local machine, not a client, so it stays. '''
@@ -233,7 +242,7 @@ class TestFailures(unittest.TestCase):
         self.assertNotIn('123-45-6789', out)
         self.assertNotIn('secretpayloadbase64', out)
 
-    def test_stats_does_not_inject_a_none_line(self):
+    def test_stats_filter_is_digested_and_no_none_line_is_injected(self):
         text = json.dumps({
             't': {'$date': '2024-01-01T00:00:00.000+00:00'},
             's': 'I', 'c': 'COMMAND', 'id': 51803, 'ctx': 'conn1',
@@ -249,8 +258,194 @@ class TestFailures(unittest.TestCase):
         }) + '\n'
         code, out, err = self._run(text, '--seed', '0')
         self.assertEqual(code, 0, err)
-        self.assertEqual(out.splitlines(), [out.strip()])
-        self.assertNotEqual(out.strip(), 'none')
+        # A missing explain path used to print a literal "none" line
+        # and then the original predicate.
+        self.assertEqual(len(out.splitlines()), 1)
+        self.assertNotIn('ada@example.com', out)
+        self.assertIn('COLLSCAN', out)
+
+    def test_ipv6_is_moved_under_the_unique_local_prefix(self):
+        def remote(value):
+            return json.dumps({
+                't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+                's': 'I', 'c': 'NETWORK', 'id': 22943, 'ctx': 'listener',
+                'msg': 'Connection accepted',
+                'attr': {'remote': value, 'connectionId': 1},
+            }) + '\n'
+
+        code, out, err = self._run(remote('[2001:db8::1]:27017'), '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('2001:db8', out)
+        self.assertIn('fd00::', out)
+        self.assertIn(':27017', out)
+        code, loopback, err = self._run(remote('[::1]:27017'), '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('[::1]:27017', loopback)
+
+    def test_keep_comment_leaves_the_comment_and_digests_the_rest(self):
+        text = json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'COMMAND', 'id': 51803, 'ctx': 'conn1',
+            'msg': 'Slow query',
+            'attr': {
+                'ns': 'app.users',
+                'command': {
+                    'find': 'users',
+                    'filter': {
+                        'email': 'ada@example.com',
+                        '$comment': 'nightly-job',
+                    },
+                    '$db': 'app',
+                },
+            },
+        }) + '\n'
+        code, kept, err = self._run(text, '--seed', '1', '--keep-comment')
+        self.assertEqual(code, 0, err)
+        self.assertIn('nightly-job', kept)
+        self.assertNotIn('ada@example.com', kept)
+        code, hidden, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('nightly-job', hidden)
+        self.assertNotIn('ada@example.com', hidden)
+
+    def test_only_ip_leaves_the_query_and_the_namespace(self):
+        text = json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'COMMAND', 'id': 51803, 'ctx': 'conn1',
+            'msg': 'Slow query',
+            'attr': {
+                'ns': 'app.users',
+                'remote': '10.1.2.3:27017',
+                'command': {
+                    'find': 'users',
+                    'filter': {'email': 'ada@example.com'},
+                    '$db': 'app',
+                },
+            },
+        }) + '\n'
+        code, out, err = self._run(text, '--only', 'ip', '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('ada@example.com', out)
+        self.assertIn('app.users', out)
+        self.assertNotIn('10.1.2.3', out)
+        self.assertIn('192.168.', out)
+        code, out, err = self._run(text, '--only', 'not-a-category')
+        self.assertEqual(code, 2)
+        self.assertIn('--only', err)
+
+    def test_same_query_changes_digest_when_the_seed_changes(self):
+        text = json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'COMMAND', 'id': 51803, 'ctx': 'conn1',
+            'msg': 'Slow query',
+            'attr': {
+                'ns': 'app.users',
+                'command': {
+                    'find': 'users',
+                    'filter': {'email': 'ada@example.com'},
+                    '$db': 'app',
+                },
+            },
+        }) + '\n'
+        first = json.loads(self._run(text, '--seed', '1')[1])
+        second = json.loads(self._run(text, '--seed', '1')[1])
+        other = json.loads(self._run(text, '--seed', '2')[1])
+        self.assertEqual(
+            first['attr']['command']['filter'],
+            second['attr']['command']['filter'])
+        self.assertNotEqual(
+            first['attr']['command']['filter'],
+            other['attr']['command']['filter'])
+        # The database stand-in and the collection stand-in come from
+        # different word lists, and $db uses the database one, so the
+        # two halves of app.users agree with the command fields.
+        ns = first['attr']['ns']
+        database, collection = ns.split('.')
+        self.assertEqual(first['attr']['command']['$db'], database)
+        self.assertEqual(first['attr']['command']['find'], collection)
+        self.assertNotIn('.', database)
+        self.assertNotIn('.', collection)
+
+    def test_client_metadata_hides_the_app_and_the_host(self):
+        text = json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'NETWORK', 'id': 51800, 'ctx': 'conn1',
+            'msg': 'client metadata',
+            'attr': {
+                'remote': '10.1.2.3:50000',
+                'appName': 'billing-worker',
+                'doc': {
+                    'application': {'name': 'payroll-svc'},
+                    'driver': {'name': 'PyMongo', 'version': '4.9.0'},
+                    'os': {'hostname': 'payments-prod-7.internal',
+                           'type': 'Linux'},
+                },
+            },
+        }) + '\n'
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('billing-worker', out)
+        self.assertNotIn('payroll-svc', out)
+        self.assertNotIn('payments-prod-7', out)
+        self.assertNotIn('10.1.2.3', out)
+        # The driver name is how you tell which client misbehaved.
+        self.assertIn('PyMongo', out)
+        self.assertIn('4.9.0', out)
+        self.assertIn('Linux', out)
+
+    def test_internal_user_is_kept(self):
+        text = json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'ACCESS', 'id': 20250, 'ctx': 'conn1',
+            'msg': 'Authentication succeeded',
+            'attr': {
+                'mechanism': 'SCRAM-SHA-256',
+                'principalName': '__system',
+                'authenticationDatabase': 'local',
+            },
+        }) + '\n'
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        document = json.loads(out)
+        self.assertEqual(document['attr']['principalName'], '__system')
+        self.assertEqual(document['attr']['authenticationDatabase'], 'local')
+
+    def test_text_log_digests_quoted_shell_values_and_leaves_bare_ones(self):
+        # Shell documents quote strings and ObjectIds, and leave
+        # identifiers and numbers bare. A full shell parser is
+        # intentionally not part of this script; the bare `key: 1.0`
+        # is the gap that remains.
+        text = (
+            '2017-01-01T00:00:00.000+0000 I WRITE [conn1] insert test.test '
+            "query: { _id: ObjectId('59aceec3c250e507159808f0'), "
+            "name: 'Ada Lovelace', key: 1.0 }\n"
+        )
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('59aceec3c250e507159808f0', out)
+        self.assertNotIn('Ada Lovelace', out)
+        self.assertNotIn('test.test', out)
+        self.assertIn('key: 1.0', out)
+
+    def test_checked_in_samples_do_not_contain_their_secrets(self):
+        with open('test/sample_redacted.4.4.log', encoding='utf-8') as handle:
+            redacted_4_4 = handle.read()
+        for secret in (
+            'Connection reset by peer', '1.2.3.4', '1.2.5.6', 'secret_user',
+            'test.collection', 'hidden_field', 'sekrit', 'coll_1', 'coll_2',
+            'some_field', '/secret/', 'MongoDB Shell',
+        ):
+            self.assertNotIn(secret, redacted_4_4, secret)
+        self.assertIn('HostUnreachable', redacted_4_4)
+        self.assertIn('IXSCAN', redacted_4_4)
+        self.assertIn('"_id_"', redacted_4_4)
+        with open('test/sample_redacted.3.4.log', encoding='utf-8') as handle:
+            redacted_3_4 = handle.read()
+        self.assertNotIn('59aceec3c250e507159808f0', redacted_3_4)
+        self.assertNotIn('10.0.0.1', redacted_3_4)
+        self.assertNotIn('host=local', redacted_3_4)
+        self.assertIn('admin.system.version', redacted_3_4)
+        self.assertIn('key: 1.0', redacted_3_4)
 
     def test_seed_is_stable_and_optional(self):
         text = json.dumps({
