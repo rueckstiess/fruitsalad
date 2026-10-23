@@ -14,12 +14,14 @@ ip
     into 192.168.0.0/16. IPv6 addresses are moved under fd00::/8,
     which is a unique-local prefix and not the customer's.
 namespace
-    Database and collection names. The same name always becomes the
-    same stand-in word for a given --seed, so a log can still be
-    followed. admin, local and config stay, and so do catalog
-    namespaces such as admin.system.users and local.oplog.rs.
-    $cmd stays. Stand-in words do not contain '.', so the number of
-    namespace components does not change.
+    Database and collection names. Within one file, the same name and
+    the same --seed produce the same stand-in, so the file can still
+    be followed. Two names never share a word, so a name takes the
+    next word when its first choice was already used earlier in that
+    file. admin, local and config stay, and so do catalog namespaces
+    such as admin.system.users and local.oplog.rs. $cmd stays.
+    Stand-in words do not contain '.', so the number of namespace
+    components does not change.
 query
     Command payloads: filters, pipelines, documents, updates, the
     findAndModify update document, SCRAM payloads, and error strings.
@@ -53,6 +55,7 @@ from enum import Enum
 import argparse
 import hashlib
 import hmac
+import ipaddress
 import json
 import re
 import secrets
@@ -121,6 +124,11 @@ _QUERY_KEYS = frozenset({
     'deletes', 'projection', 'let', 'arrayFilters', 'predicate',
     'indexBounds', 'multiKeyPaths', 'payload', 'pwd', 'digest',
     'errmsg', 'indexes', 'options', 'o', 'o2',
+    # findAndModify calls its projection "fields". create/collMod
+    # store the JSON Schema under "validator". explain names the
+    # predicate "parsedQuery". None of those are in the list above,
+    # and walking them kept the field names and the numbers.
+    'fields', 'validator', 'parsedQuery',
 })
 
 # Key patterns: the keys are field names, the values are directions
@@ -151,14 +159,12 @@ _POOLS = {
 # Four dotted decimals with each octet in 0..255. The alternatives are
 # ordered so 255 is not parsed as 25 and a leftover 5.
 _OCTET = r'(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)'
-_IPV4_ENDPOINT = re.compile(
-    rf'^(?P<ip>{_OCTET}(?:\.{_OCTET}){{3}})(?P<port>:\d+)?$'
-)
+# Lookarounds rather than a consumed character on each side.
+# "Accepted from 10.9.8.7" ends on the address, and a text line can
+# start with one. A required delimiter on both sides left those in
+# the output. \w keeps the match off the tail of a longer token.
 _IPV4_IN_TEXT = re.compile(
-    rf'(?P<prefix>[^\w])(?P<ip>{_OCTET}(?:\.{_OCTET}){{3}})(?P<suffix>[^\w])'
-)
-_IPV6_ENDPOINT = re.compile(
-    r'^\[(?P<ip>[0-9A-Fa-f:]+)\](?P<port>:\d+)?$'
+    rf'(?<!\w)(?P<ip>{_OCTET}(?:\.{_OCTET}){{3}})(?!\w)'
 )
 _IPV6_IN_TEXT = re.compile(r'\[([0-9A-Fa-f:]+)\]')
 _DOUBLE_QUOTED = re.compile(r'"(?:\\.|[^"\\])*"')
@@ -169,10 +175,74 @@ _SINGLE_QUOTED = re.compile(r"'(?:\\.|[^'\\])*'")
 _DOTTED = re.compile(
     r'[a-zA-Z$][^ \t\n\r\f\v:\'"]+(?:\.[a-zA-Z$][^ \t\n\r\f\v:\'"]+)+'
 )
+# MMAPv1 names its files "<db>.<n>" (test.0, test.1). _DOTTED misses
+# them because it wants a letter after every dot. A version such as
+# v3.4.7 has a digit in the label, and 10.8.0 starts with a digit, so
+# neither matches. The lookbehind keeps this off a stand-in that
+# _DOTTED already rewrote (color.fruit.0 is not a data file).
+_DATAFILE = re.compile(
+    r'(?<![\w.])(?P<db>[A-Za-z][A-Za-z_-]*)\.(?P<n>\d+)(?!\d)'
+)
 # Single-label host= only. A dotted host was already rewritten by
 # _DOTTED; matching dots here would rewrite the stand-in a second time.
 _HOST_EQ = re.compile(r'\bhost=(?P<host>[A-Za-z0-9_-]+)\b')
-_PLAN_KEY = re.compile(r'([A-Za-z_$][\w$]*)\s*:')
+# Dotted index keys (user.email) are one path. A pattern that stops
+# at the first dot leaves the prefix "user" in the planSummary.
+_PLAN_KEY = re.compile(
+    r'([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*)\s*:'
+)
+
+
+def _is_ip(host):
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return True
+
+
+def _split_endpoint(value):
+    """Return (host, port-including-colon, was-bracketed).
+
+    Bracketed IPv6 keeps the port outside the brackets. A trailing
+    :port is split only when the head is an address, so localhost:27017
+    stays in one piece for the hostname path and ::ffff:10.1.2.3:27017
+    does not. A bare ::1 has no port: rsplit would see host ":" and
+    port "1", which is not an address, so the whole value is kept.
+    """
+    if value.startswith('['):
+        end = value.find(']')
+        if end <= 1:
+            return None
+        rest = value[end + 1:]
+        if rest and not re.fullmatch(r':\d+', rest):
+            return None
+        return value[1:end], rest, True
+    if ':' in value:
+        host, port = value.rsplit(':', 1)
+        if host and port.isdigit() and _is_ip(host):
+            return host, ':' + port, False
+    return value, '', False
+
+
+def _decode_log_line(raw):
+    """One log line as text, with the newline normalised to \\n.
+
+    Reading the file as text raises UnicodeDecodeError from the
+    iterator, outside the per-line handler, so one bad byte dropped
+    the rest of the file. Bytes let that line become a placeholder.
+    The newline fold matches what a text-mode open used to do, which
+    is what the CRLF fixtures were generated with.
+    """
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeDecodeError:
+        return None
+    if text.endswith('\r\n'):
+        return text[:-2] + '\n'
+    if text.endswith('\r'):
+        return text[:-1] + '\n'
+    return text
 
 
 def _canonical(value):
@@ -229,12 +299,13 @@ class FruitSaladTool(object):
             self.categories = frozenset(CATEGORIES)
         else:
             self.categories = frozenset(categories)
-        # Keyed digest, not random.choice. The stand-in for a name then
-        # depends on the name and the seed, not on how many other names
-        # were seen earlier in the file or on which code path noticed
-        # the name first. The old shared map made the first sighting
-        # win, so test.test became one repeated word instead of a
-        # database stand-in plus a collection stand-in.
+        # Keyed digest, not random.choice. Which code path notices a
+        # name does not matter. A linear probe then keeps two names in
+        # one role from sharing a word, so the word a name gets can
+        # depend on names already seen in this file. The same file and
+        # the same seed stay stable. The old shared map made the first
+        # sighting win, so test.test became one repeated word instead
+        # of a database stand-in plus a collection stand-in.
         if arg_seed is None:
             self._key = secrets.token_bytes(32)
         else:
@@ -304,7 +375,19 @@ class FruitSaladTool(object):
     def _map_ipv6(self, ip):
         if 'ip' not in self.categories:
             return ip
-        folded = ip.lower()
+        try:
+            address = ipaddress.IPv6Address(ip)
+        except ValueError:
+            address = None
+        if address is not None and address == ipaddress.IPv6Address('::1'):
+            # ::0001 and 0:0:0:0:0:0:0:1 are the same loopback. The
+            # string compare missed every spelling except two of them.
+            return '::1'
+        if address is not None and address.ipv4_mapped is not None:
+            # ::ffff:a.b.c.d is an IPv4 client. Map that half. Leaving
+            # the prefix keeps the value obviously IPv6-mapped.
+            return '::ffff:' + self._map_ipv4(str(address.ipv4_mapped))
+        folded = address.compressed if address is not None else ip.lower()
         if folded in ('::1', '0:0:0:0:0:0:0:1'):
             return '::1'
         cached = self._ipv6.get(folded)
@@ -370,12 +453,13 @@ class FruitSaladTool(object):
         return '.'.join(replaced)
 
     def _hostname(self, host):
+        rewritten = self._rewrite_ip(host)
+        if rewritten is not None:
+            return rewritten
         if 'user' not in self.categories:
             return host
         if host in ('localhost', 'localhost.localdomain'):
             return host
-        if _IPV4_ENDPOINT.fullmatch(host):
-            return self._map_ipv4(host)
         if '.' in host:
             return self._redact_dotted(host)
         return self._token(host, 'host')
@@ -414,29 +498,56 @@ class FruitSaladTool(object):
             for part in parts
         )
 
+    def _rewrite_ip(self, host):
+        """Stand-in for an address, or None when host is a name.
+
+        ipaddress accepts the spellings the endpoint regexes reject:
+        ::1 written as ::0001, and IPv4 mapped into IPv6
+        (::ffff:10.1.2.3), which is how a dual-stack listener logs
+        an IPv4 client.
+        """
+        if 'ip' not in self.categories or not isinstance(host, str):
+            return None
+        try:
+            return self._map_ipv4(str(ipaddress.IPv4Address(host)))
+        except ValueError:
+            pass
+        try:
+            address = ipaddress.IPv6Address(host)
+        except ValueError:
+            return None
+        if address.ipv4_mapped is not None:
+            return '::ffff:' + self._map_ipv4(str(address.ipv4_mapped))
+        return self._map_ipv6(host)
+
     def _endpoint(self, value):
         """Redact the address in a remote/client field and keep the port.
 
         JSON logs put the client in attr.remote as "ip:port",
         "[ipv6]:port", or "hostname:port". The port is not identifying
         on its own and is useful when following a connection.
+        A bare ::1 has no brackets and more than one colon, so the
+        hostname fallback used to replace it with a word.
         """
-        if not isinstance(value, str) or 'ip' not in self.categories:
-            # Hostnames in this field are a user identifier, so they
-            # are still rewritten when the ip category is off and the
-            # user category is on. Addresses are not.
-            if isinstance(value, str) and 'user' in self.categories:
-                return self._endpoint_host(value)
+        if not isinstance(value, str):
             return value
-        matched = _IPV6_ENDPOINT.fullmatch(value)
-        if matched:
-            port = matched.group('port') or ''
-            return '[' + self._map_ipv6(matched.group('ip')) + ']' + port
-        matched = _IPV4_ENDPOINT.fullmatch(value)
-        if matched:
-            port = matched.group('port') or ''
-            return self._map_ipv4(matched.group('ip')) + port
-        return self._endpoint_host(value)
+        if 'ip' in self.categories:
+            parsed = _split_endpoint(value)
+            if parsed is not None:
+                host, port, bracketed = parsed
+                rewritten = self._rewrite_ip(host)
+                if rewritten is not None:
+                    if bracketed:
+                        return '[' + rewritten + ']' + port
+                    return rewritten + port
+        # Hostnames in this field are a user identifier, so they are
+        # still rewritten when the ip category is off and the user
+        # category is on. An address that was not recognised above
+        # is left alone when the user category is off: tokenising it
+        # as a hostname is how --only ip used to keep ::ffff:10.1.2.3.
+        if 'user' in self.categories:
+            return self._endpoint_host(value)
+        return value
 
     def _endpoint_host(self, value):
         if value.count(':') == 1:
@@ -520,7 +631,10 @@ class FruitSaladTool(object):
             body = text[opening + 1:closing]
 
             def replace_key(match, self=self):
-                return self._token(match.group(1), 'field') + ':'
+                labels = match.group(1).split('.')
+                return '.'.join(
+                    self._token(part, 'field') for part in labels
+                ) + ':'
 
             pieces.append(_PLAN_KEY.sub(replace_key, body))
             pieces.append('}')
@@ -582,7 +696,11 @@ class FruitSaladTool(object):
         collection named "1", and there is nothing to split.
         """
         if key in ('comment', '$comment'):
-            if self.keep_comment:
+            # --keep-comment is the string a job puts on a query so the
+            # line can be traced. A document is legal BSON there and
+            # can carry an email; digesting it is the same as any
+            # other payload.
+            if self.keep_comment and isinstance(value, str):
                 return value
             return self._maybe_query(value)
 
@@ -632,7 +750,9 @@ class FruitSaladTool(object):
         if key == 'planSummary' and isinstance(value, str):
             return self._plan_summary(value)
 
-        if key == 'index' and isinstance(value, str):
+        if key in ('index', 'indexName') and isinstance(value, str):
+            # explain reports the same index as indexName. _id_ is the
+            # mandatory index, not a name the customer chose.
             if value == '_id_':
                 return value
             return self._maybe_query(value)
@@ -684,9 +804,15 @@ class FruitSaladTool(object):
         return redacted
 
     def _replace_ipv4_text(self, match):
-        return (match.group('prefix')
-                + self._map_ipv4(match.group('ip'))
-                + match.group('suffix'))
+        return self._map_ipv4(match.group('ip'))
+
+    def _replace_datafile(self, match):
+        db = match.group('db')
+        # local.0 is the local database's data file. The database
+        # name is kept; only a customer database is replaced.
+        if db in _SYSTEM_DBS or db in _KEPT_LABELS:
+            return match.group(0)
+        return self._database(db) + '.' + match.group('n')
 
     def _redact_text_line(self, line):
         # Quoted strings first. An address or a namespace inside quotes
@@ -710,6 +836,10 @@ class FruitSaladTool(object):
                 lambda match: '[' + self._map_ipv6(match.group(1)) + ']',
                 line)
             line = _IPV4_IN_TEXT.sub(self._replace_ipv4_text, line)
+        if 'namespace' in self.categories:
+            # Before the dotted pass. A rewritten stand-in plus ".0"
+            # must not be treated as another data file.
+            line = _DATAFILE.sub(self._replace_datafile, line)
         if 'namespace' in self.categories or 'user' in self.categories:
             line = _DOTTED.sub(
                 lambda match: self._redact_dotted(match.group(0)), line)
@@ -725,10 +855,16 @@ class FruitSaladTool(object):
     def run(self):
         """Write the redacted file to stdout. Return the failure count."""
         self.failures = 0
-        # The handle stays open for the scan and closes when the scan
-        # finishes. Leaving it to the garbage collector warns on 3.14.
-        with open(self.logfile, 'r', encoding='utf-8') as handle:
-            for line_number, line in enumerate(handle, start=1):
+        with open(self.logfile, 'rb') as handle:
+            for line_number, raw in enumerate(handle, start=1):
+                line = _decode_log_line(raw)
+                if line is None:
+                    self._report_failure(
+                        line_number,
+                        'invalid UTF-8',
+                        raw.decode('utf-8', errors='backslashreplace'),
+                    )
+                    continue
                 try:
                     if self.logtype == LogType.TEXT:
                         sys.stdout.write(self._redact_text_line(line))
@@ -778,18 +914,30 @@ class FruitSaladTool(object):
         sys.stdout.write(placeholder + '\n')
 
     def _get_logtype(self):
-        # UTF-8 at both reads. A locale encoding here and UTF-8 in run()
-        # would split a multi-byte character on a non-UTF-8 machine.
-        # Blank lines are skipped so a leading spacer does not decide
-        # the format, and so an empty file is an error instead of
-        # IndexError on the first character.
-        with open(self.logfile, 'r', encoding='utf-8') as handle:
-            for line in handle:
+        # Same byte-wise read as run(). A locale encoding here and
+        # UTF-8 in run() would split a multi-byte character on a
+        # non-UTF-8 machine. Blank lines are skipped so a leading
+        # spacer does not decide the format, and so an empty file is
+        # an error instead of IndexError on the first character. An
+        # undecodable line is skipped while deciding: a JSON log's
+        # first real line is ASCII "{". A file that is only bad bytes
+        # is still scanned, so each of those lines can be placeholdered.
+        saw_bytes = False
+        saw_bad = False
+        with open(self.logfile, 'rb') as handle:
+            for raw in handle:
+                saw_bytes = True
+                line = _decode_log_line(raw)
+                if line is None:
+                    saw_bad = True
+                    continue
                 if not line.strip():
                     continue
                 if line.lstrip().startswith('{'):
                     return LogType.JSON
                 return LogType.TEXT
+        if saw_bytes and saw_bad:
+            return LogType.TEXT
         raise ValueError(f'{self.logfile}: empty log file')
 
 

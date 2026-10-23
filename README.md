@@ -7,7 +7,7 @@ This script reads a MongoDB log file and writes a redacted copy to stdout. It co
 Four kinds of data are removed:
 
 - **ip.** IPv4 addresses move into `192.168.0.0/16`. IPv6 addresses move under `fd00::/8` (a unique-local prefix). `127.0.0.1`, `0.0.0.0` and `::1` stay, because they name this machine. The port is kept.
-- **namespace.** Database and collection names become stable stand-in words (adjectives, colours, fruit), which is where the tool gets its name. The same name stays the same for one `--seed`, and a stand-in never contains `.`, so a name does not gain an extra component. `admin`, `local`, `config`, `$cmd`, and catalog namespaces such as `admin.system.users` and `local.oplog.rs` stay.
+- **namespace.** Database and collection names become stand-in words (adjectives, colours, fruit), which is where the tool gets its name. Within one file, the same name and the same `--seed` produce the same stand-in. Two names do not share a word, so a name takes the next word when its first choice was already used earlier in that file. A stand-in never contains `.`, so a name does not gain an extra component. `admin`, `local`, `config`, `$cmd`, and catalog namespaces such as `admin.system.users` and `local.oplog.rs` stay.
 - **query.** Filters, pipelines, documents, updates, SCRAM payloads, and error strings become one keyed digest each. Two identical queries still look identical, so the frequency of each query is preserved. Field names inside the payload go with it.
 - **user.** `principalName`, `appName`, and hostnames. `__system` stays, so replication heartbeats are not mistaken for application traffic.
 
@@ -25,7 +25,7 @@ python3 fruitsalad.py [--seed S] [--only ip,namespace,query,user] [--keep-commen
 
 Redirect stdout to keep the redacted file, for example `python3 fruitsalad.py mongod.log > redacted.log`.
 
-`--seed` reproduces stand-in names and digests. Without it, every run uses a fresh key. `--only` limits which of the four categories above are redacted; the default is all of them. `--only ip,namespace` leaves query text in place. `--keep-comment` leaves `comment` and `$comment` strings readable so a query can be traced to the job that sent it. The rest of that payload is still digested.
+`--seed` reproduces stand-in names and digests for one file. Without it, every run uses a fresh key. `--only` limits which of the four categories above are redacted; the default is all of them. `--only ip,namespace` leaves query text in place. `--keep-comment` leaves `comment` and `$comment` strings readable so a query can be traced to the job that sent it. A comment that is a document is digested with the rest of the payload.
 
 A line that cannot be redacted is replaced with a short placeholder. The original line is not written to stderr, because that stream is often stored next to the redacted file. Pass `--debug` to include it while investigating a failure. The process exits with status 1 if any line failed or the file is empty, and with status 2 if `--only` names an unknown category.
 

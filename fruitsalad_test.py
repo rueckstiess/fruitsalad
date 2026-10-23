@@ -21,9 +21,9 @@ class TestFruitSalad(unittest.TestCase):
     def _assert_matches_fixture(self, expected_path):
         """Compare the whole redacted file.
 
-        zip() stops at the shorter side, so a dropped line or an extra
-        'none' line used to pass. Both sides are stripped the way the
-        original assertions were, then compared in full, including length.
+        zip() stops at the shorter side, so a missing or extra tail
+        line used to pass. Both sides are stripped, then compared in
+        full, including length.
         """
         actual = [line.strip() for line in self.stdout.getvalue().splitlines()]
         with open(expected_path, encoding='utf-8') as handle:
@@ -463,6 +463,167 @@ class TestFailures(unittest.TestCase):
         # would mean None was still being turned into the string "None".
         unseeded = {self._run(text)[1] for _ in range(5)}
         self.assertGreater(len(unseeded), 1)
+
+    def _json_line(self, attr, msg='Slow query'):
+        return json.dumps({
+            't': {'$date': '2024-01-01T00:00:00.000+00:00'},
+            's': 'I', 'c': 'COMMAND', 'id': 51803, 'ctx': 'conn1',
+            'msg': msg,
+            'attr': attr,
+        }) + '\n'
+
+    def test_ipv4_at_the_edge_of_a_line_is_redacted(self):
+        text = self._json_line({}, msg='Accepted from 10.9.8.7')
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('10.9.8.7', out)
+        self.assertIn('192.168.', out)
+        code, out, err = self._run('10.9.8.7 connected\n', '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('10.9.8.7', out)
+        self.assertIn('192.168.', out)
+        # Loopback at the same position stays. It names this machine.
+        code, out, err = self._run('127.0.0.1 connected\n', '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('127.0.0.1', out)
+
+    def test_ipv4_mapped_and_bare_loopback(self):
+        mapped = self._json_line({'remote': '[::ffff:10.1.2.3]:27017'})
+        code, out, err = self._run(mapped, '--only', 'ip', '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('10.1.2.3', out)
+        self.assertIn('192.168.', out)
+        self.assertIn(':27017', out)
+        self.assertIn('::ffff:', out)
+        bare = self._json_line({'remote': '::1'})
+        code, out, err = self._run(bare, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('"remote": "::1"', out)
+        expanded = self._json_line({'remote': '[::0001]:27017'})
+        code, out, err = self._run(expanded, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('[::1]:27017', out)
+
+    def test_plan_summary_dotted_field_is_tokenised(self):
+        text = self._json_line({
+            'planSummary': 'IXSCAN { user.email: 1, ssn: 1 }',
+        })
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        summary = json.loads(out)['attr']['planSummary']
+        self.assertNotIn('user', summary)
+        self.assertNotIn('email', summary)
+        self.assertNotIn('ssn', summary)
+        self.assertIn('IXSCAN', summary)
+        self.assertIn(': 1', summary)
+        # Both labels of the dotted path are stand-ins, so the literal
+        # prefix is gone and the braces still hold a path.
+        inside = summary.split('{', 1)[1]
+        self.assertRegex(inside, r'[a-z0-9-]+\.[a-z0-9-]+: 1')
+
+    def test_projection_validator_and_parsed_query_are_digested(self):
+        text = self._json_line({
+            'command': {
+                'findAndModify': 'users',
+                'fields': {'ssn': 1, 'name': 1},
+                'query': {'email': 'ada@example.com'},
+                '$db': 'app',
+            },
+            'validator': {
+                'properties': {'ssn': {'bsonType': 'string'}},
+            },
+            'parsedQuery': {'age': {'$gt': 30}},
+        })
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('ssn', out)
+        self.assertNotIn('ada@example.com', out)
+        document = json.loads(out)
+        self.assertIsInstance(document['attr']['parsedQuery'], str)
+        self.assertNotIn('age', document['attr']['parsedQuery'])
+        self.assertIsInstance(document['attr']['validator'], str)
+        self.assertIsInstance(
+            document['attr']['command']['fields'], str)
+
+    def test_mmap_datafile_hides_the_database_and_keeps_versions(self):
+        text = (
+            'db version v3.4.7\n'
+            'Darwin Kernel Version 10.8.0\n'
+            'allocating new datafile /data/db/production.0, filling\n'
+            'allocating new datafile /data/db/local.0, filling\n'
+            'allocating new datafile /data/db/production.1, filling\n'
+        )
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        self.assertIn('v3.4.7', out)
+        self.assertIn('10.8.0', out)
+        self.assertIn('/data/db/local.0', out)
+        self.assertNotIn('production', out)
+        self.assertRegex(out, r'/data/db/[a-z0-9-]+\.0')
+        self.assertRegex(out, r'/data/db/[a-z0-9-]+\.1')
+
+    def test_keep_comment_digests_a_document_comment(self):
+        text = self._json_line({
+            'command': {
+                'find': 'users',
+                'filter': {'a': 1},
+                'comment': {'email': 'ada@example.com'},
+                '$db': 'app',
+            },
+        })
+        code, out, err = self._run(text, '--seed', '1', '--keep-comment')
+        self.assertEqual(code, 0, err)
+        self.assertNotIn('ada@example.com', out)
+        self.assertNotIn('email', out)
+        # A string comment is still readable, and still stays out of
+        # the digest of the rest of the filter.
+        commented = self._json_line({
+            'command': {
+                'find': 'users',
+                'filter': {'a': 1, '$comment': 'nightly-job'},
+                '$db': 'app',
+            },
+        })
+        code, kept, err = self._run(commented, '--seed', '1', '--keep-comment')
+        self.assertEqual(code, 0, err)
+        self.assertIn('nightly-job', kept)
+
+    def test_id_index_name_is_kept(self):
+        text = self._json_line({
+            'index': '_id_',
+            'indexName': '_id_',
+            'name': '_id_',
+        })
+        code, out, err = self._run(text, '--seed', '1')
+        self.assertEqual(code, 0, err)
+        document = json.loads(out)
+        self.assertEqual(document['attr']['index'], '_id_')
+        self.assertEqual(document['attr']['indexName'], '_id_')
+        self.assertEqual(document['attr']['name'], '_id_')
+
+    def test_invalid_utf8_does_not_drop_the_rest_of_the_file(self):
+        handle = tempfile.NamedTemporaryFile(delete=False, suffix='.log')
+        handle.write(
+            b'{"t":{"$date":"2024-01-01T00:00:00.000+00:00"},'
+            b'"s":"I","c":"N","id":1,"ctx":"c","msg":"before"}\n'
+        )
+        handle.write(b'\xff not-valid-utf8\n')
+        handle.write(
+            b'{"t":{"$date":"2024-01-01T00:00:00.000+00:00"},'
+            b'"s":"I","c":"N","id":1,"ctx":"c","msg":"after"}\n'
+        )
+        handle.close()
+        self.addCleanup(os.unlink, handle.name)
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            code = main([handle.name])
+        out, err = stdout.getvalue(), stderr.getvalue()
+        self.assertEqual(code, 1)
+        self.assertIn('before', out)
+        self.assertIn('after', out)
+        self.assertIn('redaction-failed', out)
+        self.assertNotIn('Traceback', err)
+        self.assertIn('invalid UTF-8', err)
 
 
 if __name__ == '__main__':

@@ -28,8 +28,8 @@
 2017-09-04T16:00:08.664+1000 I COMMAND  [conn5] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 writeConflicts:0 numYields:0 reslen:178 locks:{} 0ms
 2017-09-04T16:00:08.667+1000 D COMMAND  [conn5] run command linen.$cmd { insert: "0900be77c2cbef8412bafade7fa97a27", documents: [ { _id: ObjectId('0ead51c9fcec14953bd5fd09f5fe9a51'), key: 1.0 } ], ordered: true }
 2017-09-04T16:00:08.668+1000 I INDEX    [conn5] allocating new ns file /darkslategray.boysenberry filling with zeroes...
-2017-09-04T16:00:08.726+1000 I STORAGE  [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
-2017-09-04T16:00:08.904+1000 I STORAGE  [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.177 secs
+2017-09-04T16:00:08.726+1000 I STORAGE  [FileAllocator] allocating new datafile /data/db/linen.0, filling with zeroes...
+2017-09-04T16:00:08.904+1000 I STORAGE  [FileAllocator] done allocating datafile /data/db/linen.0, size: 64MB,  took 0.177 secs
 2017-09-04T16:00:08.924+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 disk writes
 2017-09-04T16:00:08.924+1000 D STORAGE  [conn5]    ***** ROLLING BACK 0 custom changes
 2017-09-04T16:00:08.926+1000 D STORAGE  [conn5] allocating new extent

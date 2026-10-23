@@ -16,13 +16,13 @@ Mon Sep  4 15:25:31.330 [initandlisten] waiting for connections on port 27017
 Mon Sep  4 15:25:31.680 [initandlisten] connection accepted from 127.0.0.1:56846 #1 (1 connection now open)
 Mon Sep  4 15:25:32.185 [conn1] end connection 127.0.0.1:56846 (3 connections now open)
 Mon Sep  4 15:26:00.562 [conn6] allocating new ns file /darkslategray.boysenberry filling with zeroes...
-Mon Sep  4 15:26:00.593 [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
-Mon Sep  4 15:26:00.695 [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.101 secs
-Mon Sep  4 15:26:00.713 [FileAllocator] allocating new datafile /data/db/test.1, filling with zeroes...
+Mon Sep  4 15:26:00.593 [FileAllocator] allocating new datafile /data/db/linen.0, filling with zeroes...
+Mon Sep  4 15:26:00.695 [FileAllocator] done allocating datafile /data/db/linen.0, size: 64MB,  took 0.101 secs
+Mon Sep  4 15:26:00.713 [FileAllocator] allocating new datafile /data/db/linen.1, filling with zeroes...
 Mon Sep  4 15:26:00.714 [conn6] build index linen.cloudberry { _id: 1 }
 Mon Sep  4 15:26:00.755 [conn6] build index done.  scanned 0 total records. 0.04 secs
 Mon Sep  4 15:26:00.755 [conn6] insert linen.cloudberry ninserted:1 keyUpdates:0 locks(micros) w:192860 192ms
-Mon Sep  4 15:26:00.926 [FileAllocator] done allocating datafile /data/db/test.1, size: 128MB,  took 0.212 secs
+Mon Sep  4 15:26:00.926 [FileAllocator] done allocating datafile /data/db/linen.1, size: 128MB,  took 0.212 secs
 Mon Sep  4 15:26:38.142 [conn6] creating profile collection: sweet-and-sour.coral.nut
 Mon Sep  4 15:26:48.923 [conn6] query linen.cloudberry query: { key: 1.0 } ntoreturn:0 ntoskip:0 nscanned:3 keyUpdates:0 locks(micros) r:215 nreturned:0 reslen:20 0ms
 Mon Sep  4 15:27:18.286 [conn6] query linen.cloudberry query: { cornflowerblue.blood-orange: 1.0 } ntoreturn:0 ntoskip:0 nscanned:3 keyUpdates:0 locks(micros) r:138 nreturned:0 reslen:20 0ms

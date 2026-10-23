@@ -1,3 +1,11 @@
+# setuptools 77 is the first release that accepts an SPDX license
+# expression. Without this table, pip's legacy fallback allows
+# setuptools>=40.8, and an install without build isolation fails
+# on the license field below.
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "fruitsalad"
 version = "0.1.0"

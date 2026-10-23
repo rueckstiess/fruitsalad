@@ -27,8 +27,8 @@
 2017-09-04T15:54:08.781+1000 [initandlisten] connection accepted from 127.0.0.1:57019 #6 (1 connection now open)
 2017-09-04T15:54:13.452+1000 [conn6] creating profile collection: sweet-and-sour.coral.nut
 2017-09-04T15:54:13.453+1000 [conn6] allocating new ns file /darkslategray.boysenberry filling with zeroes...
-2017-09-04T15:54:13.499+1000 [FileAllocator] allocating new datafile /data/db/test.0, filling with zeroes...
-2017-09-04T15:54:13.596+1000 [FileAllocator] done allocating datafile /data/db/test.0, size: 64MB,  took 0.097 secs
+2017-09-04T15:54:13.499+1000 [FileAllocator] allocating new datafile /data/db/linen.0, filling with zeroes...
+2017-09-04T15:54:13.596+1000 [FileAllocator] done allocating datafile /data/db/linen.0, size: 64MB,  took 0.097 secs
 2017-09-04T15:54:13.602+1000 [conn6] command linen.$cmd command: profile { profile: 2.0, slowms: -1.0 } keyUpdates:0 numYields:0 locks(micros) w:149813 reslen:58 149ms
 2017-09-04T15:54:13.605+1000 [conn6] command linen.$cmd command: isMaster { isMaster: 1.0, forShell: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
 2017-09-04T15:54:20.630+1000 [conn6] command admin.$cmd command: isMaster { isMaster: 1.0 } keyUpdates:0 numYields:0  reslen:178 0ms
