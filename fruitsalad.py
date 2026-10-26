@@ -27,10 +27,15 @@ class LogType(Enum):
 class FruitSaladTool():
     """ replace IP addresses, hostnames, namespaces, strings with random values. """
 
-    def __init__(self, arg_logfile, arg_seed=None):
-        self.seed = str(arg_seed)
+    def __init__(self, arg_logfile, arg_seed=None, debug=False):
+        # Keep None as None. str(None) is the string "None", and the old
+        # code seeded the RNG with that on every run, so the unseeded
+        # mode described by --seed never actually ran.
+        self.seed = arg_seed
         self.logfile = arg_logfile
+        self.debug = debug
         self.replacements = {}
+        self.failures = 0
         self.logtype = self._get_logtype()
 
 
@@ -113,6 +118,24 @@ class FruitSaladTool():
         # Dont obfuscate well known system namespaces
         if ns in ['local.oplog.rs', 'oplog.rs']:
             return ns
+        if not isinstance(ns, str):
+            # Two command shapes put a non-string where a collection name
+            # usually goes, and both used to abort the whole file:
+            #
+            #   {aggregate: 1}
+            #     db.aggregate() sends the integer 1 as a sentinel meaning
+            #     "this database, no collection". It is not a collection
+            #     named "1", and it has no '.' to split on.
+            #
+            #   {findAndModify: "users", update: {"$set": {"name": "Ada"}}}
+            #     On findAndModify the "update" field is the update
+            #     document. On the update command the same field is the
+            #     collection name. The type is what distinguishes them.
+            #     Hash the document. Leave numbers and other scalars as
+            #     they are.
+            if isinstance(ns, (dict, list)):
+                self._obfuscate_command(data, path)
+            return
         parts = ns.split('.')
         replaced = []
         for i, part in enumerate(parts):
@@ -184,7 +207,10 @@ class FruitSaladTool():
         path = "attr.stats.inputStage.inputStages"
         obj = self._get_by_path(data, path)
         if obj is None:
-            print('none')
+            # Explain trees are not all shaped as inputStage.inputStages.
+            # COLLSCAN, IXSCAN and SBE plans miss this path. Printing a
+            # token here inserted a literal "none" line into the redacted
+            # log, in front of a line that still contained the predicate.
             return
         for stage in obj:
             if stage == {}:
@@ -201,8 +227,12 @@ class FruitSaladTool():
     def run(self):
         """ Print out useful information about the log file. """
 
-        if self.seed != None:
-            seed(self.seed)
+        if self.seed is not None:
+            # Fixtures and the tests pass an int. The RNG was seeded with
+            # the decimal string ("0", not 0). Keep that stream so those
+            # samples still match.
+            seed(str(self.seed))
+        self.failures = 0
         line_counter = 0
         # The handle has to stay open for the whole scan and close when the
         # scan finishes. Leaving it to the garbage collector warns on 3.14
@@ -229,15 +259,15 @@ class FruitSaladTool():
                     try:
                         line_counter = line_counter + 1
                         loaded_line = json.loads(line)
-                    except json.decoder.JSONDecodeError as e:
+                    except json.decoder.JSONDecodeError as exc:
                         if re.match(r'^\s*$', line):
                             continue
-                        sys.stderr.write('Error reading line ' +
-                                         str(line_counter) + ' from ' + self.logfile + '\n\n')
-                        traceback.print_exc()
-                        sys.stderr.write('\nRaw JSON:\n')
-                        sys.stderr.write(line + '\n')
-                        sys.exit()
+                        # Keep reading. One corrupt line used to discard
+                        # every line after it, and sys.exit() with no
+                        # status reported success to the shell.
+                        self._report_failure(
+                            line_counter, f'invalid JSON ({exc.msg})', line)
+                        continue
 
                     try:
                         # PII is only found in .attr
@@ -278,6 +308,21 @@ class FruitSaladTool():
                             loaded_line, "attr.command.filter")
                         self._obfuscate_command(
                             loaded_line, "attr.command.query")
+                        # Insert and update payloads live next to the
+                        # collection name, not inside "filter". Leaving
+                        # them in place wrote the documents back out
+                        # (issue: inserts are not redacted). saslStart
+                        # carries the SCRAM conversation in "payload".
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.documents")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.updates")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.deletes")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.payload")
+                        self._obfuscate_command(
+                            loaded_line, "attr.command.pwd")
 
                         self._obfuscate_command(
                             loaded_line, "attr.error.errmsg")
@@ -286,6 +331,8 @@ class FruitSaladTool():
                             loaded_line, "attr.command.aggregate")
                         self._obfuscate_namespace(
                             loaded_line, "attr.command.find")
+                        self._obfuscate_namespace(
+                            loaded_line, "attr.command.findAndModify")
                         self._obfuscate_namespace(
                             loaded_line, "attr.command.update")
                         self._obfuscate_namespace(
@@ -321,26 +368,56 @@ class FruitSaladTool():
                         if loaded_line.get('attr', {}).get('stats', None) is not None:
                             self._obfuscate_stats(loaded_line)
 
-                    except Exception:
-                        sys.stderr.write('Error processing line ' +
-                                         str(line_counter) + ' from ' + self.logfile + '\n\n')
-                        traceback.print_exc()
-                        sys.stderr.write('\nRaw JSON:\n')
-                        sys.stderr.write(line + '\n')
-                        sys.exit()
+                    except Exception as exc:
+                        # The line may already be half rewritten. Emit a
+                        # placeholder rather than that mix, and keep going
+                        # so a later good line is still redacted.
+                        self._report_failure(
+                            line_counter, f'could not redact ({exc})', line)
+                        continue
 
                     print(json.dumps(loaded_line))
 
+        return self.failures
+
+    def _report_failure(self, line_number, reason, raw_line):
+        """Count a line we could not redact, without echoing it.
+
+        The raw line is the text the caller asked us to hide. Writing it
+        to stderr puts it in the terminal and in any collector that ships
+        stderr next to the redacted file. --debug opts back in.
+        """
+        self.failures += 1
+        sys.stderr.write(
+            f'fruitsalad: {self.logfile}:{line_number}: {reason}\n')
+        if self.debug:
+            traceback.print_exc()
+            sys.stderr.write(raw_line)
+            if not raw_line.endswith('\n'):
+                sys.stderr.write('\n')
+        if self.logtype == LogType.JSON:
+            placeholder = json.dumps({
+                'fruitsalad': 'redaction-failed',
+                'line': line_number,
+            })
+        else:
+            placeholder = f'fruitsalad redaction-failed line {line_number}'
+        sys.stdout.write(placeholder + '\n')
 
     def _get_logtype(self):
         # Read the same way run() does. A locale encoding here and UTF-8
         # later would split multi-byte characters on non-UTF-8 machines.
+        # Skip blank lines so a leading spacer does not decide the format,
+        # and so an empty file raises a clean error instead of IndexError
+        # on line[0].
         with open(self.logfile, 'r', encoding='utf-8') as handle:
-            line = handle.readline()
-            if line[0] == '{':
-                return LogType.JSON
-            else:
+            for line in handle:
+                if not line.strip():
+                    continue
+                if line.lstrip().startswith('{'):
+                    return LogType.JSON
                 return LogType.TEXT
+        raise ValueError(f'{self.logfile}: empty log file')
 
     def _get_by_path(self, data, path):
         if isinstance(path, str):
@@ -370,12 +447,23 @@ def main(argv=None):
     argparser.description = 'Anonymizes log files by replacing IP addresses, namespaces, strings.'
     argparser.add_argument('--seed', '-s', action='store', metavar='S',
                            default=None, help='seed the random number generator with S (any string)')
+    argparser.add_argument(
+        '--debug', action='store_true',
+        help='on a line that cannot be redacted, write that line and a '
+             'traceback to stderr. Off by default: the line is the data '
+             'this tool exists to hide.')
     argparser.add_argument('logfile', type=str)
     args = argparser.parse_args(argv)
 
-    tool = FruitSaladTool(arg_seed=args.seed, arg_logfile=args.logfile)
-    tool.run()
-    return 0
+    try:
+        tool = FruitSaladTool(
+            arg_seed=args.seed, arg_logfile=args.logfile, debug=args.debug)
+    except (OSError, ValueError) as exc:
+        sys.stderr.write(f'fruitsalad: {exc}\n')
+        return 1
+    # Non-zero when any line was skipped. A redacted file that quietly
+    # dropped a line would look complete.
+    return 1 if tool.run() else 0
 
 
 if __name__ == '__main__':

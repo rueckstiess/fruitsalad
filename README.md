@@ -14,6 +14,8 @@ python3 fruitsalad.py <logfile>
 
 to output the scrambled version to _stdout_, or redirect the output to a file by adding `> redacted.log` to the end of the command.
 
+A line that cannot be redacted is replaced with a short placeholder. The original line is not written to stderr, because that stream is often stored next to the redacted file. Pass `--debug` to include it while investigating a failure. The process exits with status 1 if any line failed, or if the file is empty. `--seed` is optional; without it the stand-in names change on every run.
+
 ### Tests
 
 The tests use the standard library. From the repository root:
