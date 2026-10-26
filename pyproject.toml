@@ -1,0 +1,24 @@
+[project]
+name = "fruitsalad"
+version = "0.1.0"
+description = "Redact IP addresses, namespaces, and query data from MongoDB log files."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+# Runtime dependencies are intentionally empty. The redactor uses the
+# standard library so it can be copied onto a host that has nothing but
+# Python. Extended JSON ($date, $uuid, $oid) is left as plain objects,
+# which is what the redactor needs, so PyMongo is not required.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+fruitsalad = "fruitsalad:main"
+
+[tool.setuptools]
+py-modules = ["fruitsalad"]
+
+[tool.pytest.ini_options]
+testpaths = ["fruitsalad_test.py"]
